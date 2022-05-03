@@ -13,7 +13,6 @@ import connectRedis from "connect-redis"
 import { createClient } from "redis"
 import { MyContext } from "./types/context"
 import { AbstractSqlConnection, AbstractSqlDriver } from "@mikro-orm/postgresql"
-
 ;(async () => {
   const orm = await MikroORM.init<AbstractSqlDriver<AbstractSqlConnection>>(
     micrOrmConfig
@@ -52,7 +51,7 @@ import { AbstractSqlConnection, AbstractSqlDriver } from "@mikro-orm/postgresql"
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
       resolvers,
-      validate: true, // why false ?
+      emitSchemaFile: true,
     }),
     context: ({ req, res }): MyContext => ({ em: orm.em.fork(), req, res }),
   })

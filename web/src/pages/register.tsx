@@ -5,24 +5,34 @@ import { Button } from "components/button"
 import { Card } from "components/card"
 import { InputField } from "components/input-field"
 import { withApollo } from "lib/apollo"
-import { useLoginMutation } from "@graphql"
+import { useRegisterMutation } from "@graphql"
 import { ErrorBox } from "components/error-box"
 import { credentials, type ICredentials } from "@fakestagram/common/validators"
+import * as yup from "yup"
 import Link from "next/link"
 
-type LoginFormValues = ICredentials
+type RegisterFormValues = ICredentials & {
+  confirmPassword: string
+}
 
-const Login: NextPage = () => {
-  const [login, { error }] = useLoginMutation({})
+const registerValidation = credentials.shape({
+  confirmPassword: yup
+    .string()
+    .required()
+    .test("same-as-password", "Passwords do not match", (value, context) => value === context.parent.password)
+    .label("Confirm password"),
+})
 
-  const onSubmit: FormikConfig<LoginFormValues>["onSubmit"] = async (values, { setErrors }) => {
-    await login({
-      variables: values,
-      onError: (e) => {
-        const errors = Object.fromEntries(
-          e?.graphQLErrors.map(({ message, extensions }) => [extensions.property, message]) || []
-        )
-        setErrors(errors)
+const initialValues = registerValidation.getDefault() as unknown as RegisterFormValues
+
+const Register: NextPage = () => {
+  const [register, { error }] = useRegisterMutation()
+
+  const onSubmit: FormikConfig<RegisterFormValues>["onSubmit"] = async ({ username, password }, { setErrors }) => {
+    await register({
+      variables: {
+        username,
+        password,
       },
     })
   }
@@ -30,25 +40,21 @@ const Login: NextPage = () => {
   return (
     <main className="h-screen w-full flex items-center justify-center bg-gray-50 text-xs">
       <Head>
-        <title>Login | Fakestagram</title>
+        <title>Register | Fakestagram</title>
       </Head>
       <div className="w-full max-w-[360px]">
-        <Formik
-          onSubmit={onSubmit}
-          initialValues={{ username: "", password: "" }}
-          validateOnChange={false}
-          validationSchema={credentials}
-        >
-          {({ isValid, isSubmitting }: FormikProps<LoginFormValues>) => (
-            <Card component={Form} className="">
-              <h1 className="text-lg mx-auto">Fakestagram</h1>
+        <Formik onSubmit={onSubmit} initialValues={initialValues} validationSchema={registerValidation}>
+          {({ isValid, isSubmitting }: FormikProps<RegisterFormValues>) => (
+            <Card component={Form}>
+              <h1 className="text-lg mx-auto">Register to fakestagram</h1>
               <div className="flex flex-col space-y-2 my-4">
                 <InputField name="username" label="Username" />
-                <InputField name="password" type="Password" label="Hasło" />
+                <InputField name="password" type="password" label="Password" />
+                <InputField name="confirmPassword" type="password" label="Confirm password" />
                 {error && <ErrorBox>{error.message}</ErrorBox>}
               </div>
               <Button type="submit" disabled={!isValid} loading={isSubmitting}>
-                Login
+                Register
               </Button>
               <div className="flex items-center my-6">
                 <span className="block flex-1 h-[1px] bg-gray-200" />
@@ -64,9 +70,9 @@ const Login: NextPage = () => {
 
         <Card className="py-6">
           <div className="text-center">
-            {"Don't have an account?"}{" "}
-            <Link href={"register"}>
-              <a className="text-primary">Register now</a>
+            Already have an account?{" "}
+            <Link href={"/login"}>
+              <a className="text-primary">Log in</a>
             </Link>
           </div>
         </Card>
@@ -75,4 +81,4 @@ const Login: NextPage = () => {
   )
 }
 
-export default withApollo(Login)
+export default withApollo(Register)

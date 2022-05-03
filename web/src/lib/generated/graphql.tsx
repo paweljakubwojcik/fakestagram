@@ -168,7 +168,7 @@ export type RegisterMutationVariables = Exact<{
 }>;
 
 
-export type RegisterMutation = { __typename?: 'Mutation', login: { __typename?: 'User', id: string } };
+export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'User', id: string } };
 
 
 export const LoginDocument = gql`
@@ -208,7 +208,7 @@ export type LoginMutationResult = Apollo.MutationResult<LoginMutation>;
 export type LoginMutationOptions = Apollo.BaseMutationOptions<LoginMutation, LoginMutationVariables>;
 export const RegisterDocument = gql`
     mutation Register($username: String!, $password: String!) {
-  login(credentials: {username: $username, password: $password}) {
+  register(credentials: {username: $username, password: $password}) {
     id
   }
 }

@@ -1,5 +1,5 @@
 import * as yup from 'yup'
-import { YupSchema } from '../types/typ-schema'
+import { YupSchema } from '../types/type-schema'
 
 export interface ICredentials {
     username: string
@@ -7,14 +7,11 @@ export interface ICredentials {
 }
 
 export const credentials = yup.object<YupSchema<ICredentials>>({
-    username: yup
-        .string()
-        .min(8, 'Password should have minimum ${min} length')
-        .max(32, 'Password should have maximum ${max} characters')
-        .required(),
+    username: yup.string().min(3).max(16).required().default('').label('Username'),
 
     password: yup
         .string()
+        .default("")
         .matches(/^(?=.*\d)/g, {
             message: 'Password must contain at least one number character',
         })
@@ -24,7 +21,10 @@ export const credentials = yup.object<YupSchema<ICredentials>>({
         .matches(/^(?=.*[A-Z])/g, {
             message: 'Password must contain at least one upper case letter',
         })
-        .min(8, 'Password should have minimum ${min} length')
-        .max(32, 'Password should have maximum ${max} characters')
-        .required(),
+        .min(8)
+        .max(32)
+        .required()
+        .label('Password'),
 })
+
+credentials.getDefault().password
