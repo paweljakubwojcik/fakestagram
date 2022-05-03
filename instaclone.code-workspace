@@ -1,0 +1,21 @@
+{
+	"folders": [
+		{
+			"path": "server"
+		},
+		{
+			"path": "web"
+		},
+		{
+			"path": "common"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"cSpell.words": [
+			"fakestagram"
+		]
+	}
+}

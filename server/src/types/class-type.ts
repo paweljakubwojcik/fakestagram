@@ -1,0 +1,1 @@
+export type ClassType<T = any> = abstract new (...args: any) => T

@@ -1,0 +1,30 @@
+{
+    "name": "@fakestagram/common",
+    "private": true,
+    "version": "0.0.2",
+    "description": "",
+    "exports": {
+        "./validators": "./dist/validators/index.js"
+    },
+    "typesVersions": {
+        "*": {
+            "validators": [
+                "dist/validators/index.d.ts"
+            ]
+        }
+    },
+    "typings": "dist/index.d.ts",
+    "repository": "",
+    "author": "",
+    "license": "",
+    "scripts": {
+        "build": "rm -rf ./dist && tsc"
+    },
+    "devDependencies": {
+        "@types/yup": "^0.29.13",
+        "typescript": "^4.6.4"
+    },
+    "dependencies": {
+        "yup": "^0.32.11"
+    }
+}
