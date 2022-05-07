@@ -32,12 +32,12 @@ export const InputField = memo(<T,>({ className, name, validate, label, ...props
           className={classnames(
             "border rounded-sm p-2 bg-gray-50 w-full focus:outline-none transition-colors autofill:border-primary",
             value && "bg-white",
-            error && "border-red-600 bg-rose-50",
+            showError && "border-red-600 bg-rose-50",
             className
           )}
         />
       </div>
-      <div className="transition-all empty:h-0 h-[1em] empty:opacity-0 opacity-100 my-1 text-red-700 ">
+      <div className="transition-all empty:h-0 h-fit empty:opacity-0 opacity-100 my-1 text-red-700 ">
         {showError && error}
       </div>
     </div>

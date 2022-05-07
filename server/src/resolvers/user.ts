@@ -17,10 +17,13 @@ import { ApolloError, UserInputError } from "apollo-server-core"
 import { isAuth } from "src/middleware/is-auth"
 import { Post } from "src/entities/post"
 import { ValidateArg } from "src/decorators/validate"
-import { type ICredentials, credentials } from "@fakestagram/common/validators"
+import {
+  credentials,
+  type CredentialsType,
+} from "@fakestagram/common/validators"
 
 @InputType()
-class Credentials implements ICredentials {
+class Credentials implements CredentialsType {
   @Field()
   username: string
 
@@ -60,7 +63,7 @@ export class UserResolver {
 
   @Mutation(() => User)
   async login(
-    @Arg("credentials", { validate: false })
+    @Arg("credentials")
     { password, username }: Credentials,
     @Ctx() { em, req }: MyContext
   ): Promise<User> {

@@ -7,25 +7,26 @@ import { InputField } from "components/input-field"
 import { withApollo } from "lib/apollo"
 import { useRegisterMutation } from "@graphql"
 import { ErrorBox } from "components/error-box"
-import { credentials, type ICredentials } from "@fakestagram/common/validators"
+import { credentials } from "@fakestagram/common/validators"
 import * as yup from "yup"
 import Link from "next/link"
-
-type RegisterFormValues = ICredentials & {
-  confirmPassword: string
-}
+import { useRouter } from "next/router"
 
 const registerValidation = credentials.shape({
   confirmPassword: yup
     .string()
+    .default("")
     .required()
     .test("same-as-password", "Passwords do not match", (value, context) => value === context.parent.password)
     .label("Confirm password"),
 })
 
-const initialValues = registerValidation.getDefault() as unknown as RegisterFormValues
+type RegisterFormValues = yup.InferType<typeof registerValidation>
+
+const initialValues = registerValidation.getDefault()
 
 const Register: NextPage = () => {
+  const router = useRouter()
   const [register, { error }] = useRegisterMutation()
 
   const onSubmit: FormikConfig<RegisterFormValues>["onSubmit"] = async ({ username, password }, { setErrors }) => {
@@ -35,6 +36,7 @@ const Register: NextPage = () => {
         password,
       },
     })
+    router.push("/")
   }
 
   return (

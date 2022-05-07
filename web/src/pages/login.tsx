@@ -7,24 +7,23 @@ import { InputField } from "components/input-field"
 import { withApollo } from "lib/apollo"
 import { useLoginMutation } from "@graphql"
 import { ErrorBox } from "components/error-box"
-import { credentials, type ICredentials } from "@fakestagram/common/validators"
+import { credentials, type CredentialsType } from "@fakestagram/common/validators"
 import Link from "next/link"
+import { useRouter } from "next/router"
 
-type LoginFormValues = ICredentials
+type LoginFormValues = CredentialsType
 
 const Login: NextPage = () => {
+  const router = useRouter()
   const [login, { error }] = useLoginMutation({})
 
-  const onSubmit: FormikConfig<LoginFormValues>["onSubmit"] = async (values, { setErrors }) => {
-    await login({
-      variables: values,
-      onError: (e) => {
-        const errors = Object.fromEntries(
-          e?.graphQLErrors.map(({ message, extensions }) => [extensions.property, message]) || []
-        )
-        setErrors(errors)
-      },
-    })
+  const onSubmit: FormikConfig<LoginFormValues>["onSubmit"] = async (values) => {
+    try {
+      await login({
+        variables: values,
+      })
+      router.push("/")
+    } catch (e) {}
   }
 
   return (
@@ -33,12 +32,7 @@ const Login: NextPage = () => {
         <title>Login | Fakestagram</title>
       </Head>
       <div className="w-full max-w-[360px]">
-        <Formik
-          onSubmit={onSubmit}
-          initialValues={{ username: "", password: "" }}
-          validateOnChange={false}
-          validationSchema={credentials}
-        >
+        <Formik onSubmit={onSubmit} initialValues={credentials.getDefault()}>
           {({ isValid, isSubmitting }: FormikProps<LoginFormValues>) => (
             <Card component={Form} className="">
               <h1 className="text-lg mx-auto">Fakestagram</h1>
@@ -65,7 +59,7 @@ const Login: NextPage = () => {
         <Card className="py-6">
           <div className="text-center">
             {"Don't have an account?"}{" "}
-            <Link href={"register"}>
+            <Link href={"/register"}>
               <a className="text-primary">Register now</a>
             </Link>
           </div>

@@ -1,17 +1,13 @@
 import * as yup from 'yup'
-import { YupSchema } from '../types/type-schema'
 
-export interface ICredentials {
-    username: string
-    password: string
-}
-
-export const credentials = yup.object<YupSchema<ICredentials>>({
-    username: yup.string().min(3).max(16).required().default('').label('Username'),
+export const credentials = yup.object({
+    username: yup.string().label('Username').required().default('').min(3).max(16),
 
     password: yup
         .string()
-        .default("")
+        .label('Password')
+        .required()
+        .default('')
         .matches(/^(?=.*\d)/g, {
             message: 'Password must contain at least one number character',
         })
@@ -22,9 +18,7 @@ export const credentials = yup.object<YupSchema<ICredentials>>({
             message: 'Password must contain at least one upper case letter',
         })
         .min(8)
-        .max(32)
-        .required()
-        .label('Password'),
+        .max(32),
 })
 
-credentials.getDefault().password
+export type CredentialsType = yup.InferType<typeof credentials>

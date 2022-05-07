@@ -1,18 +1,18 @@
 import { MikroORM } from "@mikro-orm/core"
-import { __prod__ } from "./constants"
-import "module-alias/register"
-import micrOrmConfig from "./mikro-orm.config"
-
-import express from "express"
-import { ApolloServer } from "apollo-server-express"
-import { buildSchema } from "type-graphql"
-import { resolvers } from "./resolvers/index"
-
-import session from "express-session"
-import connectRedis from "connect-redis"
-import { createClient } from "redis"
-import { MyContext } from "./types/context"
 import { AbstractSqlConnection, AbstractSqlDriver } from "@mikro-orm/postgresql"
+import { ApolloServer } from "apollo-server-express"
+import connectRedis from "connect-redis"
+import express from "express"
+import session from "express-session"
+import "module-alias/register"
+import { createClient } from "redis"
+import { buildSchema } from "type-graphql"
+import { __prod__ } from "./constants"
+import micrOrmConfig from "./mikro-orm.config"
+import { resolvers } from "./resolvers/index"
+import { MyContext } from "./types/context"
+import cors from "cors"
+
 ;(async () => {
   const orm = await MikroORM.init<AbstractSqlDriver<AbstractSqlConnection>>(
     micrOrmConfig
@@ -30,8 +30,15 @@ import { AbstractSqlConnection, AbstractSqlDriver } from "@mikro-orm/postgresql"
   const app = express()
 
   app.use(
+    cors({
+      credentials: true,
+      origin: "http://localhost:3000",
+    })
+  )
+
+  app.use(
     session({
-      name: "reddit-cookie",
+      name: "instaclone_auth",
       store: new RedisStore({
         client: redisClient,
         disableTouch: true,
@@ -44,6 +51,7 @@ import { AbstractSqlConnection, AbstractSqlDriver } from "@mikro-orm/postgresql"
         httpOnly: true,
         secure: __prod__, // https only
         sameSite: "lax", // csrf
+        path: "/",
       },
     })
   )
@@ -56,7 +64,7 @@ import { AbstractSqlConnection, AbstractSqlDriver } from "@mikro-orm/postgresql"
     context: ({ req, res }): MyContext => ({ em: orm.em.fork(), req, res }),
   })
   await apolloServer.start()
-  apolloServer.applyMiddleware({ app })
+  apolloServer.applyMiddleware({ app, cors: false })
 
   await new Promise<void>((resolve) => app.listen({ port: 4000 }, resolve))
   console.log("server running on http://localhost:4000/graphql")

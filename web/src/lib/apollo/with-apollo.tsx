@@ -5,7 +5,7 @@ import { config } from "./apollo-client.config"
 
 type WithApolloParams = Parameters<ReturnType<typeof nextWithApollo>>
 type NextPageComp = WithApolloParams[0]
-type WithApolloOptions = Omit<WithApolloParams[1], "getDataFromTree"> & { ssr?: boolean }
+type WithApolloOptions = Omit<NonNullable<WithApolloParams[1]>, "getDataFromTree"> & { ssr?: boolean }
 
 const withApollo = (Comp: NextPageComp, { ssr, ...options }: WithApolloOptions = {}) =>
   nextWithApollo(
