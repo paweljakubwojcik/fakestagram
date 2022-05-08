@@ -5,7 +5,7 @@ import { Button } from "components/button"
 import { Card } from "components/card"
 import { InputField } from "components/input-field"
 import { withApollo } from "lib/apollo"
-import { useLoginMutation } from "@graphql"
+import { MeDocument, useLoginMutation } from "@graphql"
 import { ErrorBox } from "components/error-box"
 import { credentials, type CredentialsType } from "@fakestagram/common/validators"
 import Link from "next/link"
@@ -15,7 +15,16 @@ type LoginFormValues = CredentialsType
 
 const Login: NextPage = () => {
   const router = useRouter()
-  const [login, { error }] = useLoginMutation({})
+  const [login, { error }] = useLoginMutation({
+    update: (cache, { data }) => {
+      cache.writeQuery({
+        query: MeDocument,
+        data: {
+          me: data?.login,
+        },
+      })
+    },
+  })
 
   const onSubmit: FormikConfig<LoginFormValues>["onSubmit"] = async (values) => {
     try {
@@ -34,7 +43,7 @@ const Login: NextPage = () => {
       <div className="w-full max-w-[360px]">
         <Formik onSubmit={onSubmit} initialValues={credentials.getDefault()}>
           {({ isValid, isSubmitting }: FormikProps<LoginFormValues>) => (
-            <Card component={Form} className="">
+            <Card component={Form} className="p-8">
               <h1 className="text-lg mx-auto">Fakestagram</h1>
               <div className="flex flex-col space-y-2 my-4">
                 <InputField name="username" label="Username" />

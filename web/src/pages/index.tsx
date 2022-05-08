@@ -1,18 +1,18 @@
-import { useMeQuery } from "@graphql"
 import { withApollo } from "lib/apollo"
 import type { NextPage } from "next"
 import Head from "next/head"
+import { Navbar } from "components/navbar"
 
 const Home: NextPage = () => {
-  const { data: { me } = {} } = useMeQuery()
 
   return (
-    <main className="h-screen w-full flex items-center justify-center bg-gray-50 text-xs">
+    <div className="h-screen w-full bg-gray-50 text-xs">
       <Head>
         <title>Home | Fakestagram</title>
       </Head>
-      Siemaneczko {me?.username}
-    </main>
+      <Navbar />
+      <main className="max-w-main-content mx-auto">Siemaneczko</main>
+    </div>
   )
 }
 

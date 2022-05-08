@@ -5,7 +5,7 @@ import { Button } from "components/button"
 import { Card } from "components/card"
 import { InputField } from "components/input-field"
 import { withApollo } from "lib/apollo"
-import { useRegisterMutation } from "@graphql"
+import { MeDocument, useRegisterMutation } from "@graphql"
 import { ErrorBox } from "components/error-box"
 import { credentials } from "@fakestagram/common/validators"
 import * as yup from "yup"
@@ -27,7 +27,16 @@ const initialValues = registerValidation.getDefault()
 
 const Register: NextPage = () => {
   const router = useRouter()
-  const [register, { error }] = useRegisterMutation()
+  const [register, { error }] = useRegisterMutation({
+    update: (cache, { data }) => {
+      cache.writeQuery({
+        query: MeDocument,
+        data: {
+          me: data?.register,
+        },
+      })
+    },
+  })
 
   const onSubmit: FormikConfig<RegisterFormValues>["onSubmit"] = async ({ username, password }, { setErrors }) => {
     await register({
@@ -47,7 +56,7 @@ const Register: NextPage = () => {
       <div className="w-full max-w-[360px]">
         <Formik onSubmit={onSubmit} initialValues={initialValues} validationSchema={registerValidation}>
           {({ isValid, isSubmitting }: FormikProps<RegisterFormValues>) => (
-            <Card component={Form}>
+            <Card component={Form} className="p-8">
               <h1 className="text-lg mx-auto">Register to fakestagram</h1>
               <div className="flex flex-col space-y-2 my-4">
                 <InputField name="username" label="Username" />

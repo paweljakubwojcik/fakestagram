@@ -1,14 +1,18 @@
-import { FC, ComponentPropsWithoutRef, ElementType, ComponentType, createElement } from "react"
 import classnames from "classnames"
+import { ComponentPropsWithRef, ComponentType, createElement, ElementType, FC, ForwardedRef, forwardRef } from "react"
 
-type CardProps = ComponentPropsWithoutRef<"div"> & {
-  component?: ElementType | ComponentType
+type CardProps<T extends ElementType = ElementType> = ComponentPropsWithRef<T> & {
+  component?: T | ComponentType
 }
 
-export const Card: FC<CardProps> = ({ className, children, component = "div", ...props }) => {
-  return createElement<CardProps>(
-    component,
-    { className: classnames("bg-white flex flex-col p-8 border rounded-sm m-3", className), ...props },
-    children
-  )
-}
+export const Card: FC<CardProps> = forwardRef(
+  ({ className, children, component = "div", ...props }, ref: ForwardedRef<ElementType>) => {
+    return createElement<CardProps>(
+      component,
+      { className: classnames("bg-white flex flex-col border rounded-sm m-3", className), ref, ...props },
+      children
+    )
+  }
+)
+
+Card.displayName = "Card"
