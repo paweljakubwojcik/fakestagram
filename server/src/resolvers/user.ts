@@ -21,6 +21,7 @@ import {
   credentials,
   type CredentialsType,
 } from "@fakestagram/common/validators"
+import { COOKIE_NAME } from "src/constants"
 
 @InputType()
 class Credentials implements CredentialsType {
@@ -88,6 +89,22 @@ export class UserResolver {
   ): Promise<Boolean> {
     const usernameCount = await em.count(User, { username })
     return usernameCount === 0
+  }
+
+  @Mutation(() => Boolean)
+  async logout(@Ctx() { req, res }: MyContext) {
+    return new Promise((resolve) => {
+      req.session.destroy((err) => {
+        if (err) {
+          console.log(err)
+          resolve(false)
+          return
+        } else {
+          res.clearCookie(COOKIE_NAME)
+          resolve(true)
+        }
+      })
+    })
   }
 
   @FieldResolver()

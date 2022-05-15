@@ -10,6 +10,7 @@ import { ErrorBox } from "components/error-box"
 import { credentials, type CredentialsType } from "@fakestagram/common/validators"
 import Link from "next/link"
 import { useRouter } from "next/router"
+import { publicOnlyPage } from "components/public-only-page"
 
 type LoginFormValues = CredentialsType
 
@@ -78,4 +79,4 @@ const Login: NextPage = () => {
   )
 }
 
-export default withApollo(Login)
+export default withApollo(publicOnlyPage(Login))

@@ -30,6 +30,7 @@ type Mutation {
   dislikePost(post: String!): Boolean!
   likePost(post: String!): Boolean!
   login(credentials: Credentials!): User!
+  logout: Boolean!
   register(credentials: Credentials!): User!
   updatePost(body: String, id: String!, title: String): Post
 }

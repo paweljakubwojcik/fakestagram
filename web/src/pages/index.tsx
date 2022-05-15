@@ -2,6 +2,7 @@ import { withApollo } from "lib/apollo"
 import type { NextPage } from "next"
 import Head from "next/head"
 import { Navbar } from "components/navbar"
+import { authPage } from "components/auth-page"
 
 const Home: NextPage = () => {
 
@@ -16,4 +17,4 @@ const Home: NextPage = () => {
   )
 }
 
-export default withApollo(Home)
+export default withApollo(authPage(Home))

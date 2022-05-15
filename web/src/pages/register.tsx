@@ -11,6 +11,7 @@ import { credentials } from "@fakestagram/common/validators"
 import * as yup from "yup"
 import Link from "next/link"
 import { useRouter } from "next/router"
+import { publicOnlyPage } from "components/public-only-page"
 
 const registerValidation = credentials.shape({
   confirmPassword: yup
@@ -92,4 +93,4 @@ const Register: NextPage = () => {
   )
 }
 
-export default withApollo(Register)
+export default withApollo(publicOnlyPage(Register))

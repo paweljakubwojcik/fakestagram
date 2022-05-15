@@ -7,12 +7,11 @@ import session from "express-session"
 import "module-alias/register"
 import { createClient } from "redis"
 import { buildSchema } from "type-graphql"
-import { __prod__ } from "./constants"
+import { COOKIE_NAME, __prod__ } from "./constants"
 import micrOrmConfig from "./mikro-orm.config"
 import { resolvers } from "./resolvers/index"
 import { MyContext } from "./types/context"
 import cors from "cors"
-
 ;(async () => {
   const orm = await MikroORM.init<AbstractSqlDriver<AbstractSqlConnection>>(
     micrOrmConfig
@@ -38,7 +37,7 @@ import cors from "cors"
 
   app.use(
     session({
-      name: "instaclone_auth",
+      name: COOKIE_NAME,
       store: new RedisStore({
         client: redisClient,
         disableTouch: true,
