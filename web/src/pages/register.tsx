@@ -1,7 +1,7 @@
 import { Form, Formik, FormikConfig, FormikProps } from "formik"
 import type { NextPage } from "next"
 import Head from "next/head"
-import { Button } from "components/button"
+import { Button } from "components/buttons/button"
 import { Card } from "components/card"
 import { InputField } from "components/input-field"
 import { withApollo } from "lib/apollo"
@@ -65,7 +65,7 @@ const Register: NextPage = () => {
                 <InputField name="confirmPassword" type="password" label="Confirm password" />
                 {error && <ErrorBox>{error.message}</ErrorBox>}
               </div>
-              <Button type="submit" disabled={!isValid} loading={isSubmitting}>
+              <Button type="submit" mode="primary" disabled={!isValid} loading={isSubmitting}>
                 Register
               </Button>
               <div className="flex items-center my-6">
@@ -73,7 +73,7 @@ const Register: NextPage = () => {
                 <span className="mx-4 text-gray-400">OR</span>
                 <span className="block flex-1 h-[1px] bg-gray-200" />
               </div>
-              <Button mode="inline" className="!text-xs">
+              <Button mode="secondary" className="!text-xs">
                 Log in with github
               </Button>
             </Card>

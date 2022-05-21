@@ -1,7 +1,7 @@
 import { Form, Formik, FormikConfig, FormikProps } from "formik"
 import type { NextPage } from "next"
 import Head from "next/head"
-import { Button } from "components/button"
+import { Button } from "components/buttons"
 import { Card } from "components/card"
 import { InputField } from "components/input-field"
 import { withApollo } from "lib/apollo"

@@ -6,9 +6,9 @@ import { useRouter } from "next/router"
 import sloth from "public/sloth.jpg"
 import { ComponentPropsWithoutRef, FC } from "react"
 import { Heart, Home, PlusSquare, Send } from "react-feather"
-import { Button } from "./button"
+import { Button } from "./buttons/button"
 import { Card } from "./card"
-import { IconButton } from "./icon-button"
+import { IconButton } from "./buttons/icon-button"
 import { PopoverMenu } from "./popover-menu"
 
 type NavbarProps = ComponentPropsWithoutRef<"header">
@@ -29,22 +29,22 @@ export const Navbar: FC<NavbarProps> = ({ className }) => {
           {me ? (
             <>
               <Link href={"/"} passHref>
-                <IconButton title="Home" asLink>
+                <IconButton title="Home" renderAs="a">
                   <Home />
                 </IconButton>
               </Link>
               <Link href={"direct"} passHref>
-                <IconButton title="Direct" asLink>
+                <IconButton title="Direct" renderAs="a">
                   <Send />
                 </IconButton>
               </Link>
               <Link href={"create"} passHref>
-                <IconButton title="Create" asLink>
+                <IconButton title="Create" renderAs="a">
                   <PlusSquare />
                 </IconButton>
               </Link>
               <Link href={"likes"} passHref>
-                <IconButton title="Liked" asLink>
+                <IconButton title="Liked" renderAs="a">
                   <Heart />
                 </IconButton>
               </Link>
@@ -69,12 +69,12 @@ export const Navbar: FC<NavbarProps> = ({ className }) => {
           ) : (
             <>
               <Link href={"login"} passHref>
-                <Button mode="primary" asLink>
+                <Button mode="primary" renderAs="a">
                   Login
                 </Button>
               </Link>
               <Link href={"register"} passHref>
-                <Button mode="secondary" asLink>
+                <Button mode="secondary" renderAs="a">
                   Register
                 </Button>
               </Link>

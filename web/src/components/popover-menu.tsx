@@ -1,7 +1,8 @@
 import { FC, ComponentPropsWithoutRef, useState, ReactNode } from "react"
 import classnames from "classnames"
 import { ArrowContainer, ArrowContainerProps, Popover, useArrowContainer } from "react-tiny-popover"
-import { Button } from "./button"
+import { Button } from "./buttons/button"
+import { ButtonBase } from "./buttons/button-base"
 
 type PopoverMenuProps = ComponentPropsWithoutRef<"div"> & {
   content: ReactNode
@@ -50,9 +51,13 @@ export const PopoverMenu: FC<PopoverMenuProps> = ({ className, children, content
         </CustomArrowContainer>
       )}
     >
-      <Button mode="inline" onClick={() => {setOpen((v) => !v)}}>
+      <ButtonBase
+        onClick={() => {
+          setOpen((v) => !v)
+        }}
+      >
         {children}
-      </Button>
+      </ButtonBase>
     </Popover>
   )
 }
