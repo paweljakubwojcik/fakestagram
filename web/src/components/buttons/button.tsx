@@ -6,6 +6,7 @@ import { ButtonBase } from "./button-base"
 type ButtonProps = ComponentProps<typeof ButtonBase> & {
   mode?: "primary" | "secondary" | "default"
   loading?: boolean
+  baseClassName?: string
 }
 
 const Loader = () => (
@@ -13,15 +14,14 @@ const Loader = () => (
 )
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, children, mode = "default", loading, ...props }, ref) => {
+  ({ className, baseClassName, children, mode = "default", loading, ...props }, ref) => {
     return (
       <ButtonBase
         {...props}
         ref={ref}
         className={classnames(
-          className,
-          `relative overflow-visible before:rounded before:bg-insta-gradient before:absolute 
-            before:w-full before:h-full`
+          baseClassName,
+          mode !== "default" && `relative overflow-visible before:rounded before:bg-insta-gradient before:absolute before:w-full before:h-full`
         )}
       >
         <div
@@ -30,7 +30,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             "flex justify-center items-center transition-colors",
             mode !== "primary" && "bg-white group-hover:bg-white/90",
             mode === "primary" && "bg-transparent group-hover:bg-gray-50/20",
-            mode === "default" && "group-hover:bg-gray-200/80"
+            mode === "default" && "group-hover:bg-gray-200/80",
+            className
           )}
         >
           <span>{loading && <Loader />}</span>
