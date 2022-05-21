@@ -8,6 +8,7 @@ import { ComponentPropsWithoutRef, FC } from "react"
 import { Heart, Home, PlusSquare, Send } from "react-feather"
 import { Button } from "./button"
 import { Card } from "./card"
+import { IconButton } from "./icon-button"
 import { PopoverMenu } from "./popover-menu"
 
 type NavbarProps = ComponentPropsWithoutRef<"header">
@@ -15,12 +16,6 @@ type NavbarProps = ComponentPropsWithoutRef<"header">
 export const Navbar: FC<NavbarProps> = ({ className }) => {
   const router = useRouter()
   const { me, loading, logout } = useAuth()
-
-  if (me === null) {
-    router.push("/login")
-  }
-
-  if (loading ) return <div>Loading...</div>
 
   return (
     <Card component="header" className={classnames("flex m-0 py-0 px-4  w-full", className)}>
@@ -33,22 +28,30 @@ export const Navbar: FC<NavbarProps> = ({ className }) => {
         <div className="menu flex space-x-6">
           {me ? (
             <>
-              <Button mode="inline">
-                <Home />
-              </Button>
-              <Button mode="inline">
-                <Send />
-              </Button>
-              <Button mode="inline">
-                <PlusSquare />
-              </Button>
-              <Button mode="inline">
-                <Heart />
-              </Button>
+              <Link href={"/"} passHref>
+                <IconButton title="Home" asLink>
+                  <Home />
+                </IconButton>
+              </Link>
+              <Link href={"direct"} passHref>
+                <IconButton title="Direct" asLink>
+                  <Send />
+                </IconButton>
+              </Link>
+              <Link href={"create"} passHref>
+                <IconButton title="Create" asLink>
+                  <PlusSquare />
+                </IconButton>
+              </Link>
+              <Link href={"likes"} passHref>
+                <IconButton title="Liked" asLink>
+                  <Heart />
+                </IconButton>
+              </Link>
               <PopoverMenu
                 content={
                   <div className="w-52 flex flex-col items-stretch">
-                    <Button mode="secondary" className="border-0" onClick={() => logout()}>
+                    <Button className="border-0" onClick={() => logout()}>
                       Log out
                     </Button>
                   </div>
@@ -65,8 +68,16 @@ export const Navbar: FC<NavbarProps> = ({ className }) => {
             </>
           ) : (
             <>
-              <Button mode="primary">Login</Button>
-              <Button mode="secondary">Register</Button>
+              <Link href={"login"} passHref>
+                <Button mode="primary" asLink>
+                  Login
+                </Button>
+              </Link>
+              <Link href={"register"} passHref>
+                <Button mode="secondary" asLink>
+                  Register
+                </Button>
+              </Link>
             </>
           )}
         </div>

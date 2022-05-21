@@ -50,7 +50,7 @@ export const PopoverMenu: FC<PopoverMenuProps> = ({ className, children, content
         </CustomArrowContainer>
       )}
     >
-      <Button mode="inline" onClick={() => setOpen((v) => !v)}>
+      <Button mode="inline" onClick={() => {setOpen((v) => !v)}}>
         {children}
       </Button>
     </Popover>

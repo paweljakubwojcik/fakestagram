@@ -32,7 +32,6 @@ const Login: NextPage = () => {
       await login({
         variables: values,
       })
-      router.push("/")
     } catch (e) {}
   }
 
@@ -51,7 +50,7 @@ const Login: NextPage = () => {
                 <InputField name="password" type="Password" label="Hasło" />
                 {error && <ErrorBox>{error.message}</ErrorBox>}
               </div>
-              <Button type="submit" disabled={!isValid} loading={isSubmitting}>
+              <Button type="submit" mode="primary" disabled={!isValid} loading={isSubmitting}>
                 Login
               </Button>
               <div className="flex items-center my-6">
@@ -59,7 +58,7 @@ const Login: NextPage = () => {
                 <span className="mx-4 text-gray-400">OR</span>
                 <span className="block flex-1 h-[1px] bg-gray-200" />
               </div>
-              <Button mode="inline" className="!text-xs">
+              <Button mode="secondary" className="!text-xs">
                 Log in with github
               </Button>
             </Card>
