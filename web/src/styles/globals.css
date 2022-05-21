@@ -6,6 +6,10 @@
   input {
     @apply autofill:bg-none;
   }
+
+  html {
+    --instagradient: linear-gradient(#6559ca, #bc318f 30%, #e33f5f 50%, #f77638 70%, #fec66d 100%);
+  }
 }
 
 @layer utilities {

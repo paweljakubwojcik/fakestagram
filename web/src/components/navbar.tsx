@@ -4,20 +4,32 @@ import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/router"
 import sloth from "public/sloth.jpg"
-import { ComponentPropsWithoutRef, FC, useState } from "react"
+import { ComponentPropsWithoutRef, FC, memo, useEffect, useState } from "react"
 import { Heart, Home, PlusSquare, Send } from "react-feather"
 import { Button } from "./buttons/button"
 import { Card } from "./card"
 import { IconButton } from "./buttons/icon-button"
 import { PopoverMenu } from "./popover-menu"
 import { CreatePostView } from "./views/create-post"
+import { SplashScreen } from "./splash-screen"
 
 type NavbarProps = ComponentPropsWithoutRef<"header">
 
-export const Navbar: FC<NavbarProps> = ({ className }) => {
-  const { me, loading, logout } = useAuth()
+export const Navbar: FC<NavbarProps> = memo(({ className }) => {
+  const { logout, loading, me } = useAuth()
   const [creatingPost, setCreatingPost] = useState(false)
 
+  const NavigationSkeleton = () => (
+    <>
+      {[1, 2, 3, 4, 5].map((k) => (
+        <div
+          key={k}
+          className="block w-7 h-7 bg-gray-300 animate-pulse rounded-full"
+          style={{ animationDelay: `${k * 100}ms` }}
+        />
+      ))}
+    </>
+  )
   return (
     <>
       <CreatePostView open={creatingPost} onClose={() => setCreatingPost(false)} />
@@ -29,7 +41,7 @@ export const Navbar: FC<NavbarProps> = ({ className }) => {
             </Link>
           </h1>
           <div className="menu flex space-x-6">
-            {me ? (
+            {!loading && me && (
               <>
                 <Link href={"/"} passHref>
                   <IconButton title="Home" renderAs="a">
@@ -52,7 +64,12 @@ export const Navbar: FC<NavbarProps> = ({ className }) => {
                 <PopoverMenu
                   content={
                     <div className="w-52 flex flex-col items-stretch">
-                      <Button className="border-0" onClick={() => logout()}>
+                      <Link href={`${me.username}`} passHref>
+                        <Button className="border-b" renderAs="a">
+                          Profile
+                        </Button>
+                      </Link>
+                      <Button className="" onClick={() => logout()}>
                         Log out
                       </Button>
                     </div>
@@ -67,7 +84,9 @@ export const Navbar: FC<NavbarProps> = ({ className }) => {
                   />
                 </PopoverMenu>
               </>
-            ) : (
+            )}
+
+            {!loading && !me && (
               <>
                 <Link href={"login"} passHref>
                   <Button mode="primary" renderAs="a">
@@ -81,9 +100,13 @@ export const Navbar: FC<NavbarProps> = ({ className }) => {
                 </Link>
               </>
             )}
+
+            {loading && <NavigationSkeleton />}
           </div>
         </div>
       </Card>
     </>
   )
-}
+})
+
+Navbar.displayName = "Navbar"
