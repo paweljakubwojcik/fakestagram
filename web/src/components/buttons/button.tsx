@@ -31,7 +31,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             mode !== "primary" && "bg-white group-hover:bg-white/90",
             mode === "primary" && "bg-transparent group-hover:bg-gray-50/20",
             mode === "default" && "group-hover:bg-gray-200/80",
-            className
+            className,
           )}
         >
           <span>{loading && <Loader />}</span>

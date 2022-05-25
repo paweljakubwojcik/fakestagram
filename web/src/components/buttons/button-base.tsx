@@ -18,7 +18,7 @@ export const ButtonBase = forwardRef<PossibleHtmlElements, ButtonBaseProps>(
       renderAs,
       {
         className: classnames(
-          "font-semibold text-sm rounded-sm transition-colors flex justify-center items-center group",
+          "font-semibold text-sm rounded-sm transition-colors flex justify-center items-center group h-fit",
           disabled && "filter grayscale cursor-default pointer-events-none",
           className
         ),

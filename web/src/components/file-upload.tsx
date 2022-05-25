@@ -41,6 +41,8 @@ export const FileUpload: FC<FileUploadProps> = ({ className, onChange }) => {
           setDropping(false)
           onChange(Array.from(e.target.files || []))
         }}
+        multiple
+        accept="image/*"
       />
     </label>
   )

@@ -4,6 +4,7 @@ import { createPortal } from "react-dom"
 import { Card } from "./card"
 import { IconButton } from "./buttons"
 import { X } from "react-feather"
+import useResizeObserver from "use-resize-observer"
 
 type ModalProps = Omit<ComponentPropsWithoutRef<"div">, "title"> & {
   open?: boolean
@@ -12,6 +13,8 @@ type ModalProps = Omit<ComponentPropsWithoutRef<"div">, "title"> & {
 }
 
 export const Modal: FC<ModalProps> = ({ className, children, open, title, onClose }) => {
+  const { height = 1, ref } = useResizeObserver()
+
   return open
     ? createPortal(
         <div
@@ -26,8 +29,12 @@ export const Modal: FC<ModalProps> = ({ className, children, open, title, onClos
             <X className="w-8 h-8" />
           </IconButton>
           <Card className={classnames("animate-appear rounded-3xl overflow-hidden", className)}>
-            <header className="border-b w-full p-4 py-2 text-center font-semibold">{title}</header>
-            <div className="h-full w-full">{children}</div>
+            <header ref={ref} className="border-b w-full p-4 py-2 text-center font-semibold">
+              {title}
+            </header>
+            <div className=" w-full" style={{ height: `calc(100% - ${height}px)` }}>
+              {children}
+            </div>
           </Card>
         </div>,
         document.body

@@ -13,7 +13,8 @@ module.exports = {
         "main-content": "975px",
       },
       boxShadow: {
-        "insta": "0 0 5px 1px rgba( .1, .1, .1 ,.0975)"
+        "insta": "0 0 5px 1px rgba( .1, .1, .1 ,.0975)",
+        "camera": "0 0px 7px 2px rgb(0 0 0 / 0.25)"
       }
     },
   },

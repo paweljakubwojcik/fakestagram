@@ -1,30 +1,59 @@
-import { Button } from "components/buttons"
+import { Button, IconButton } from "components/buttons"
 import { FileUpload } from "components/file-upload"
 import { Modal } from "components/modal"
 import Head from "next/head"
 import { isEmpty } from "ramda"
+import { v4 as uuid } from "uuid"
 import { ComponentProps, ComponentPropsWithoutRef, FC, useState } from "react"
+import { toBase64 } from "utils/to-base-64"
+import { EditableImage } from "./types/editable-image"
+import { ImageCrop } from "./components/image-crop"
+import { ArrowLeft } from "react-feather"
 
 type CreatePostProps = ComponentPropsWithoutRef<"div"> & ComponentProps<typeof Modal>
 
+type ImageMap = Record<string, EditableImage>
+
 export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, ...props }) => {
-  const [files, setFiles] = useState<File[]>([])
+  const [images, setImages] = useState<ImageMap>({})
   const [closingModal, setClosingModal] = useState(false)
+
+  const handleAddFiles = async (files: File[]) => {
+    const imageUrls = await Promise.all(files.map((file) => toBase64(file)))
+    const images = Object.fromEntries(imageUrls.map((base64url) => [uuid(), { base64url }]))
+    setImages(images)
+  }
 
   const handleClose = () => {
     onClose?.()
-    setFiles([])
+    setImages({})
     setClosingModal(false)
   }
+
+  const uploading = isEmpty(images)
+  const cropping = !isEmpty(images)
 
   return (
     <>
       <Modal
         {...props}
-        title={"Create new post"}
-        className="aspect-square w-1/2 max-w-lg min-w-[350px]  min-h-fit max-h-full m-10 overflow-hidden"
+        title={
+          <>
+            {uploading && "Create new post"}
+            {cropping && (
+              <div className="flex justify-between items-center">
+                <IconButton>
+                  <ArrowLeft />
+                </IconButton>
+                <div>Crop</div>
+                <Button className="py-1">Next</Button>
+              </div>
+            )}
+          </>
+        }
+        className="aspect-square w-1/2 min-w-[350px] max-w-3xl min-h-fit max-h-full m-10 overflow-hidden"
         onClose={() => {
-          if (isEmpty(files)) {
+          if (isEmpty(images)) {
             handleClose()
           } else {
             setClosingModal(true)
@@ -34,9 +63,14 @@ export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, ...pro
         <Head>
           <title>Create new post | Fakestagram</title>
         </Head>
-        <div className="p-4 w-full h-full">
-          <FileUpload onChange={setFiles} />
-        </div>
+
+        {uploading && (
+          <div className="p-4 w-full h-full">
+            <FileUpload onChange={handleAddFiles} />{" "}
+          </div>
+        )}
+        {cropping && <ImageCrop images={images} />}
+
         <Modal
           open={closingModal}
           title={
