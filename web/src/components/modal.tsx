@@ -32,7 +32,7 @@ export const Modal: FC<ModalProps> = ({ className, children, open, title, onClos
             <header ref={ref} className="border-b w-full p-4 py-2 text-center font-semibold">
               {title}
             </header>
-            <div className=" w-full" style={{ height: `calc(100% - ${height}px)` }}>
+            <div className="w-full" style={{ minHeight: `calc(100% - ${height}px)` }}>
               {children}
             </div>
           </Card>

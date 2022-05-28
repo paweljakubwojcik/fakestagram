@@ -28,9 +28,9 @@ export const FileUpload: FC<FileUploadProps> = ({ className, onChange }) => {
       <div className={classnames(dropping && "child:instagradient child:text-white")}>
         <Files />
       </div>
-      <span className="text-xl font-thin my-3">Przeciągnij zdjęcia i filmy tutaj</span>
+      <span className="text-xl font-thin my-3">Drag photos and videos here</span>
       <Button mode="primary" className="my-2" onClick={() => inputRef.current?.click()}>
-        Wybierz z komputera
+        Upload file
       </Button>
       <input
         type="file"

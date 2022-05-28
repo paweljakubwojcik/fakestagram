@@ -7,7 +7,7 @@ import { v4 as uuid } from "uuid"
 import { ComponentProps, ComponentPropsWithoutRef, FC, useState } from "react"
 import { toBase64 } from "utils/to-base-64"
 import { EditableImage } from "./types/editable-image"
-import { ImageCrop } from "./components/image-crop"
+import { ImageCrop } from "./image-crop"
 import { ArrowLeft } from "react-feather"
 
 type CreatePostProps = ComponentPropsWithoutRef<"div"> & ComponentProps<typeof Modal>
@@ -51,7 +51,7 @@ export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, ...pro
             )}
           </>
         }
-        className="aspect-square w-1/2 min-w-[350px] max-w-3xl min-h-fit max-h-full m-10 overflow-hidden"
+        className="w-1/2 min-w-[350px] max-w-3xl min-h-fit max-h-full m-10 overflow-hidden"
         onClose={() => {
           if (isEmpty(images)) {
             handleClose()

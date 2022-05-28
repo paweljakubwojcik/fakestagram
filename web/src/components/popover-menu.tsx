@@ -52,6 +52,7 @@ export const PopoverMenu: FC<PopoverMenuProps> = ({ className, children, content
       )}
     >
       <ButtonBase
+        className={className}
         onClick={() => {
           setOpen((v) => !v)
         }}
