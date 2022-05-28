@@ -19,12 +19,12 @@ const CustomArrowContainer = ({ children, arrowSize, ...props }: ArrowContainerP
 
   return (
     <div style={arrowContainerStyle}>
-      <div className="bg-white  shadow-insta">
+      <div className="bg-white dark:bg-gray-800 shadow-insta">
         <div
           style={{ top, left, width: arrowSize * 2, height: arrowSize * 2 }}
-          className={`block bg-white absolute rotate-45  shadow-insta `}
+          className={`block bg-white dark:bg-gray-800 absolute rotate-45  shadow-insta `}
         />
-        <div className="bg-white relative">{children}</div>
+        <div className="bg-white dark:bg-gray-800 relative">{children}</div>
       </div>
     </div>
   )

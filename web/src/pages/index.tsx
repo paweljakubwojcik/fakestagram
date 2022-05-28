@@ -7,13 +7,13 @@ import { authPage } from "components/auth-page"
 const Home: NextPage = () => {
 
   return (
-    <div className="h-screen w-full bg-gray-50 text-xs">
+    <>
       <Head>
         <title>Home | Fakestagram</title>
       </Head>
       <Navbar />
       <main className="max-w-main-content mx-auto">Siemaneczko</main>
-    </div>
+    </>
   )
 }
 

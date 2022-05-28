@@ -1,11 +1,12 @@
 import { GradientsProvider } from "components/gradients-provider"
+import { Layout } from "components/layout"
 import { useProgressBar } from "hooks/use-progress-bar"
-import type { AppProps } from "next/app"
 import Head from "next/head"
+import { AppPropsWithLayout } from "types"
 import "../styles/globals.css"
 import "../styles/nprogress.css"
 
-function MyApp({ Component, pageProps }: AppProps) {
+function MyApp({ Component, pageProps }: AppPropsWithLayout) {
   useProgressBar()
 
   return (
@@ -16,7 +17,9 @@ function MyApp({ Component, pageProps }: AppProps) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <GradientsProvider />
-      <Component {...pageProps} />
+      <Layout>
+        <Component {...pageProps} />
+      </Layout>
     </>
   )
 }

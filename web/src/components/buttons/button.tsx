@@ -21,14 +21,15 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         className={classnames(
           baseClassName,
-          mode !== "default" && `relative overflow-visible before:rounded before:bg-insta-gradient before:absolute before:w-full before:h-full`
+          mode !== "default" && `relative overflow-visible before:rounded before:bg-insta-gradient before:absolute before:w-full before:h-full`,
+          mode === "secondary" && "before:transition-opacity before:opacity-0 before:hover:opacity-100"
         )}
       >
         <div
           className={classnames(
-            "p-2 relative w-full h-full m-[1px] text-black block rounded-sm",
+            "p-2 relative w-full h-full m-[1px] text-black block rounded-sm text-inherit",
             "flex justify-center items-center transition-colors",
-            mode !== "primary" && "bg-white group-hover:bg-white/90",
+            mode !== "primary" && "group-hover:bg-white/90 dark:group-hover:bg-gray-700/80",
             mode === "primary" && "bg-transparent group-hover:bg-gray-50/20",
             mode === "default" && "group-hover:bg-gray-200/80",
             className,

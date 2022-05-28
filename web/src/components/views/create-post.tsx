@@ -84,7 +84,7 @@ export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, ...pro
           onClose={() => setClosingModal(false)}
         >
           <div className="flex flex-col">
-            <Button onClick={handleClose} className="border-b !py-4 !text-red-600">
+            <Button onClick={handleClose} className="border-b !py-4 !error-text">
               Abort
             </Button>
             <Button onClick={() => setClosingModal(false)} className="!py-4">

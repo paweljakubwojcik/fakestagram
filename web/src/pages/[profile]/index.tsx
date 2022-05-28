@@ -17,13 +17,13 @@ const Profile: NextPage = () => {
   } */
 
   return (
-    <div className="h-screen w-full bg-gray-50 text-xs">
+    <>
       <Head>
         <title>{profile} | Fakestagram</title>
       </Head>
       <Navbar />
       <main className="max-w-main-content mx-auto">{profile}`s` profile</main>
-    </div>
+    </>
   )
 }
 

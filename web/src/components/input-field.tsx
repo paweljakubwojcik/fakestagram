@@ -20,7 +20,7 @@ export const InputField = memo(<T,>({ className, name, validate, label, ...props
           htmlFor={name}
           className={classnames(
             "absolute text-gray-400 px-1 ml-1 pointer-events-none transform origin-top-left transition-all",
-            value && "-translate-y-full scale-90 bg-white"
+            value && "-translate-y-full scale-90 bg-inherit"
           )}
         >
           {label}
@@ -30,14 +30,14 @@ export const InputField = memo(<T,>({ className, name, validate, label, ...props
           {...field}
           value={value || ""}
           className={classnames(
-            "border rounded-sm p-2 bg-gray-50 w-full focus:outline-none transition-colors autofill:border-primary autofill:bg-transparent",
+            "border rounded-sm p-2 bg-gray-50/10  w-full focus:outline-none transition-colors autofill:border-primary autofill:bg-transparent",
             value && "bg-white",
             showError && "border-red-600 bg-rose-50",
             className
           )}
         />
       </div>
-      <div className="transition-all empty:h-0 h-fit empty:opacity-0 opacity-100 my-1 text-red-700 ">
+      <div className="transition-all empty:h-0 h-fit empty:opacity-0 opacity-100 my-1 !error-text ">
         {showError && error}
       </div>
     </div>

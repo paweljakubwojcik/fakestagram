@@ -7,8 +7,7 @@ export const Files: FC<FilesProps> = ({ className }) => {
   return (
     <svg
       aria-label="Ikona przedstawiająca multimedia takie jak obrazy lub filmy"
-      color="#262626"
-      fill="#262626"
+      fill="currentColor"
       height="77"
       role="img"
       viewBox="0 0 97.6 77.3"

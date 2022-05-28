@@ -29,7 +29,7 @@ export const FileUpload: FC<FileUploadProps> = ({ className, onChange }) => {
         <Files />
       </div>
       <span className="text-xl font-thin my-3">Drag photos and videos here</span>
-      <Button mode="primary" className="my-2" onClick={() => inputRef.current?.click()}>
+      <Button mode="primary" baseClassName="my-2" onClick={() => inputRef.current?.click()}>
         Upload file
       </Button>
       <input

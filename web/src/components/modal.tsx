@@ -28,8 +28,8 @@ export const Modal: FC<ModalProps> = ({ className, children, open, title, onClos
           <IconButton className="fixed top-4 right-4 text-white text-lg" onClick={onClose}>
             <X className="w-8 h-8" />
           </IconButton>
-          <Card className={classnames("animate-appear rounded-3xl overflow-hidden", className)}>
-            <header ref={ref} className="border-b w-full p-4 py-2 text-center font-semibold">
+          <Card className={classnames("animate-appear rounded-3xl overflow-hidden dark:!bg-gray-800", className)}>
+            <header ref={ref} className="border-b w-full p-4 py-2 text-center font-semibold dark:text-white">
               {title}
             </header>
             <div className="w-full" style={{ minHeight: `calc(100% - ${height}px)` }}>
