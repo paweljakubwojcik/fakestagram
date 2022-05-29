@@ -1,85 +1,17 @@
 import { Button, IconButton } from "components/buttons"
 import { FileUpload } from "components/file-upload"
 import { Modal } from "components/modal"
+import { createImageConfig, ImageConfigContext, imagesConfigReducer } from "components/post-form/images-config-context"
+import produce from "immer"
 import Head from "next/head"
 import { isEmpty } from "ramda"
-import { v4 as uuid } from "uuid"
-import { ComponentProps, ComponentPropsWithoutRef, FC, ReducerAction, useEffect, useReducer, useState } from "react"
-import { toBase64 } from "utils/to-base-64"
-import { AspectRatio, CropData, EditableImage } from "./types/editable-image"
-import { ImageCrop } from "./image-crop"
+import { ComponentProps, ComponentPropsWithoutRef, FC, useEffect, useReducer, useState } from "react"
 import { ArrowLeft } from "react-feather"
-import produce from "immer"
+import { toBase64 } from "utils/to-base-64"
+import { v4 as uuid } from "uuid"
+import { ImageCrop } from "./image-crop/image-crop"
 
 type CreatePostProps = ComponentPropsWithoutRef<"div"> & ComponentProps<typeof Modal>
-
-type ImageMap = Record<string, EditableImage>
-
-const getImageAspectRatio = (url: string) => {
-  const image = document.createElement("img")
-  image.src = url
-
-  return new Promise<{ x: number; y: number }>((res, rej) => {
-    image.addEventListener("load", () => {
-      res({ x: image.width, y: image.height })
-    })
-    image.addEventListener("error", () => {
-      rej("Cannot read dimensions of an image")
-    })
-  })
-}
-
-const createImageConfig = async (file: File): Promise<EditableImage> => {
-  const base64url = await toBase64(file)
-  const aspectRatio = await getImageAspectRatio(base64url)
-
-  return {
-    base64url,
-    crop: { x: 0, y: 0, scale: 1 },
-    aspectRatio,
-    originalAspectRatio: aspectRatio,
-  }
-}
-
-export type ImageAction =
-  | { type: "ADD"; images: EditableImage[] }
-  | { type: "REMOVE"; id: string }
-  | { type: "CLEAR" }
-  | { type: "SET_CROP"; crop: Partial<CropData>; id: string }
-  | { type: "SET_ASPECT_RATIO"; aspectRatio: AspectRatio; id: string }
-
-const imagesConfigReducer = (state: ImageMap, action: ImageAction) => {
-  return produce(state, (draft) => {
-    switch (action.type) {
-      case "ADD": {
-        const newImages = Object.fromEntries(action.images.map((image) => [uuid(), image]))
-        Object.assign(draft, newImages)
-        break
-      }
-      case "REMOVE": {
-        delete draft[action.id]
-        break
-      }
-      case "CLEAR": {
-        const keys = Object.keys(draft)
-        keys.forEach((k) => {
-          delete draft[k]
-        })
-        break
-      }
-      case "SET_CROP": {
-        Object.assign(draft[action.id].crop, action.crop)
-        break
-      }
-      case "SET_ASPECT_RATIO": {
-        Object.assign(draft[action.id].aspectRatio, action.aspectRatio)
-        break
-      }
-      default:
-        break
-    }
-  })
-}
 
 const STEPS = ["UPLOADING", "CROPPING", "META"] as const
 type STEP = typeof STEPS[number]
@@ -102,8 +34,6 @@ const stepsReducer = (state: STEP, action: StepAction) => {
 export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, ...props }) => {
   const [images, dispatch] = useReducer(imagesConfigReducer, {})
 
-  const [closingModal, setClosingModal] = useState(false)
-
   const handleAddFiles = async (files: File[]) => {
     dispatch({ type: "ADD", images: await Promise.all(files.map((file) => createImageConfig(file))) })
     stepDispatch({ type: "SET", step: "CROPPING" })
@@ -112,7 +42,6 @@ export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, ...pro
   const handleClose = () => {
     onClose?.()
     dispatch({ type: "CLEAR" })
-    setClosingModal(false)
   }
 
   const [step, stepDispatch] = useReducer(stepsReducer, STEPS[0])
@@ -127,7 +56,7 @@ export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, ...pro
   const meta = step === "META"
 
   return (
-    <>
+    <ImageConfigContext.Provider value={{ images, dispatch }}>
       <Modal
         {...props}
         title={
@@ -168,9 +97,9 @@ export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, ...pro
             <FileUpload onChange={handleAddFiles} />
           </div>
         )}
-        {cropping && <ImageCrop images={images} dispatch={dispatch} />}
+        {cropping && <ImageCrop />}
         {meta && <div>Meta form</div>}
       </Modal>
-    </>
+    </ImageConfigContext.Provider>
   )
 }
