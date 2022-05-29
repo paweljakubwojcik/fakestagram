@@ -1,19 +1,22 @@
 import classnames from "classnames"
+import { useAppDispatch, useAppSelector } from "lib/redux/hooks"
+import { CropData, postFormActions, postFormSelectors } from "lib/redux/reducers/create-post"
 import { ComponentPropsWithoutRef, FC, MouseEvent, useEffect, useRef, useState } from "react"
 import { flushSync } from "react-dom"
 import { Point } from "types"
 import useResizeObserver from "use-resize-observer"
-import { CropData, useImageConfigContext } from "../images-config-context"
 import { Controls } from "./controls"
-import { getBoundary, softMaxFn, bound, getWidthAndHeight } from "./utils"
+import { bound, getBoundary, getWidthAndHeight, softMaxFn } from "./utils"
 
 type ImageCropProps = ComponentPropsWithoutRef<"div">
 
 export const ImageCrop: FC<ImageCropProps> = ({ className }) => {
-  const { images, dispatch } = useImageConfigContext()
-  const [imageKey, setImageKey] = useState(Object.keys(images)[0])
+  const dispatch = useAppDispatch()
+  const { setCrop } = postFormActions
 
-  const currentImage = images[imageKey]
+  const currentImage = useAppSelector(postFormSelectors.getCurrentImage)
+  const imageKey = useAppSelector((state) => state.postForm.currentImage)
+
   const aspectRatio = currentImage.aspectRatio
 
   const [isGrabbing, setIsGrabbing] = useState(false)
@@ -38,7 +41,7 @@ export const ImageCrop: FC<ImageCropProps> = ({ className }) => {
       const screenSizeCropData = {
         x: (currentImage.crop.x * imageSizeOnScreen.width) / currentImage.originalAspectRatio.x,
         y: (currentImage.crop.y * imageSizeOnScreen.height) / currentImage.originalAspectRatio.y,
-        scale: currentImage.crop.scale
+        scale: currentImage.crop.scale,
       }
       const newTranslate = { ...screenSizeCropData, ...newTranslateObj }
       const { x, y, scale } = newTranslate
@@ -51,7 +54,7 @@ export const ImageCrop: FC<ImageCropProps> = ({ className }) => {
     const screenSizeCropData = {
       x: (currentImage.crop.x * imageSizeOnScreen.width) / currentImage.originalAspectRatio.x,
       y: (currentImage.crop.y * imageSizeOnScreen.height) / currentImage.originalAspectRatio.y,
-      scale: currentImage.crop.scale
+      scale: currentImage.crop.scale,
     }
     picPrevTranslate.current = screenSizeCropData
     localTranslate.current = screenSizeCropData
@@ -104,7 +107,7 @@ export const ImageCrop: FC<ImageCropProps> = ({ className }) => {
       x: (newCropData.x * currentImage.originalAspectRatio.x) / imageSizeOnScreen.width,
       y: (newCropData.y * currentImage.originalAspectRatio.y) / imageSizeOnScreen.height,
     }
-    dispatch({ type: "SET_CROP", crop: realSizeCropData, id: imageKey })
+    dispatch(setCrop({ crop: realSizeCropData }))
   }
 
   return (
@@ -156,7 +159,7 @@ export const ImageCrop: FC<ImageCropProps> = ({ className }) => {
           <span className="h-full w-[1px] block bg-gray-50 absolute left-2/3" />
         </div>
       </div>
-      <Controls applyTranslate={applyTranslate} currentImageKey={imageKey} setImageKey={setImageKey} />
+      <Controls applyTranslate={applyTranslate} />
     </div>
   )
 }

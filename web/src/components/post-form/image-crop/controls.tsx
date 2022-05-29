@@ -2,14 +2,13 @@ import classnames from "classnames"
 import { Button, IconButton } from "components/buttons"
 import { ButtonBase } from "components/buttons/button-base"
 import { Slider } from "components/slider"
+import { useAppDispatch, useAppSelector } from "lib/redux/hooks"
+import { AspectRatio, CropData, postFormActions, postFormSelectors } from "lib/redux/reducers/create-post"
 import { ComponentPropsWithoutRef, FC, useState } from "react"
 import { Copy as ImageSwitchIcon, Maximize as AspectRatioChangeIcon, ZoomIn as ScaleIcon } from "react-feather"
-import { AspectRatio, CropData, useImageConfigContext } from "../images-config-context"
 import { ControlsMenu } from "./controls-menu"
 
 type ControlsProps = ComponentPropsWithoutRef<"div"> & {
-  currentImageKey: string
-  setImageKey: (image: string) => void
   applyTranslate: (data: Partial<CropData>) => void
 }
 
@@ -28,9 +27,11 @@ const ASPECTS_RATIOS: AspectRatio[] = [
   },
 ]
 
-export const Controls: FC<ControlsProps> = ({ className, currentImageKey, setImageKey, applyTranslate }) => {
-  const { images, dispatch } = useImageConfigContext()
-  const currentImage = images[currentImageKey]
+export const Controls: FC<ControlsProps> = ({ className, applyTranslate }) => {
+  const dispatch = useAppDispatch()
+  const { setCrop, remove, setAspectRatio, setCurrentImage } = postFormActions
+  const currentImage = useAppSelector(postFormSelectors.getCurrentImage)
+  const images = useAppSelector(postFormSelectors.getImages)
   const aspectRatio = currentImage.aspectRatio
 
   const [openControl, setOpenControl] = useState<string>()
@@ -54,7 +55,7 @@ export const Controls: FC<ControlsProps> = ({ className, currentImageKey, setIma
                 "bg-transparent !text-white p-4 w-24 text-right group-hover:!bg-gray-50/20 opacity-60",
                 aspectRatio.x === x && aspectRatio.y === y && "!opacity-100"
               )}
-              onClick={() => dispatch({ type: "SET_ASPECT_RATIO", aspectRatio: { x, y }, id: currentImageKey })}
+              onClick={() => dispatch(setAspectRatio({ aspectRatio: { x, y } }))}
             >
               {label}
             </Button>
@@ -73,7 +74,7 @@ export const Controls: FC<ControlsProps> = ({ className, currentImageKey, setIma
             value={currentImage.crop.scale}
             onChange={(scale) => {
               applyTranslate({ scale })
-              dispatch({ type: "SET_CROP", crop: { scale }, id: currentImageKey })
+              dispatch(setCrop)
             }}
             min={1}
             max={2}
@@ -94,17 +95,12 @@ export const Controls: FC<ControlsProps> = ({ className, currentImageKey, setIma
               <IconButton
                 className="absolute right-2 top-2"
                 onClick={() => {
-                  if (currentImageKey === id) {
-                    const keys = Object.keys(images)
-                    const currentImageIndex = keys.findIndex((i) => i === id)
-                    setImageKey(keys[currentImageIndex > 0 ? currentImageIndex - 1 : keys.length + 1])
-                  }
-                  dispatch({ type: "REMOVE", id })
+                  dispatch(remove({ id }))
                 }}
               >
                 X
               </IconButton>
-              <ButtonBase onClick={() => setImageKey(id)}>
+              <ButtonBase onClick={() => dispatch(setCurrentImage({ id }))}>
                 <div
                   className="block w-24 h-24 bg-cover bg-no-repeat bg-center"
                   style={{

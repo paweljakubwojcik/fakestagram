@@ -1,5 +1,4 @@
-import { Point } from "types"
-import { AspectRatio, EditableImage } from "../images-config-context"
+import { AspectRatio, EditableImage } from "lib/redux/reducers/create-post"
 
 export const bound = (value: number, max: number, min: number) => Math.min(Math.max(min, value), max)
 
