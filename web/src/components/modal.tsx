@@ -1,10 +1,12 @@
 import type { FC, ComponentPropsWithoutRef, ReactNode } from "react"
 import classnames from "classnames"
 import { createPortal } from "react-dom"
+import { createRoot } from "react-dom/client"
 import { Card } from "./card"
-import { IconButton } from "./buttons"
+import { Button, IconButton } from "./buttons"
 import { X } from "react-feather"
 import useResizeObserver from "use-resize-observer"
+import { v4 as uuid } from "uuid"
 
 type ModalProps = Omit<ComponentPropsWithoutRef<"div">, "title"> & {
   open?: boolean
@@ -12,7 +14,7 @@ type ModalProps = Omit<ComponentPropsWithoutRef<"div">, "title"> & {
   onClose?: () => void
 }
 
-export const Modal: FC<ModalProps> = ({ className, children, open, title, onClose }) => {
+const InnerModal: FC<ModalProps> = ({ className, children, open, title, onClose }) => {
   const { height = 1, ref } = useResizeObserver()
 
   return open
@@ -41,3 +43,73 @@ export const Modal: FC<ModalProps> = ({ className, children, open, title, onClos
       )
     : null
 }
+
+type ConfirmationModalProps = {
+  title: string
+  onAccept: () => void
+  onCancel?: () => void
+  onClose?: () => void
+  info?: string
+  open: boolean
+}
+
+const ConfirmationModal = ({ onAccept, onCancel, title, info, open, onClose }: ConfirmationModalProps) => {
+  return (
+    <Modal
+      open={open}
+      title={
+        <div className="p-4">
+          <h3 className="font-semibold">{title}</h3>
+          <h4 className="font-thin text-gray-500 text-base">{info}</h4>
+        </div>
+      }
+      onClose={onClose}
+    >
+      <div className="flex flex-col">
+        <Button
+          onClick={() => {
+            onAccept()
+            onClose?.()
+          }}
+          className="border-b !py-4 !error-text"
+        >
+          Ok
+        </Button>
+        <Button
+          onClick={() => {
+            onCancel?.()
+            onClose?.()
+          }}
+          className="!py-4"
+        >
+          Cancel
+        </Button>
+      </div>
+    </Modal>
+  )
+}
+
+type OpenModalOptions = Omit<ConfirmationModalProps, "open">
+/**
+ * Static method that allow convinient acces to modal in callbacks
+ */
+const openModal = ({ onClose, ...props }: OpenModalOptions) => {
+  const modalContainer = document.createElement("div")
+  document.body.appendChild(modalContainer)
+  const root = createRoot(modalContainer)
+  root.render(
+    <ConfirmationModal
+      open={true}
+      {...props}
+      onClose={() => {
+        onClose?.()
+        root.unmount()
+        modalContainer.remove()
+      }}
+    />
+  )
+}
+
+export const Modal = Object.assign(InnerModal, {
+  open: openModal,
+})

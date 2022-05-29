@@ -1,6 +1,6 @@
 import classnames from "classnames"
 import { Button, IconButton } from "components/buttons"
-import { PopoverMenu } from "components/popover-menu"
+import { ButtonBase } from "components/buttons/button-base"
 import { Slider } from "components/slider"
 import {
   ComponentPropsWithoutRef,
@@ -15,22 +15,13 @@ import {
 } from "react"
 import { flushSync } from "react-dom"
 import { Copy as ImageSwitchIcon, Icon, Maximize as AspectRatioChangeIcon, ZoomIn as ScaleIcon } from "react-feather"
-import { Popover } from "react-tiny-popover"
 import useResizeObserver from "use-resize-observer"
-import { EditableImage } from "./types/editable-image"
+import { ImageAction } from "./create-post"
+import { CropData, EditableImage } from "./types/editable-image"
 
 type ImageCropProps = ComponentPropsWithoutRef<"div"> & {
   images: Record<string, EditableImage>
-}
-
-const getImageAspectRatio = (url: string) => {
-  const image = document.createElement("img")
-  image.src = url
-
-  return {
-    heightToWidth: image.height / image.width,
-    widthToHeight: image.width / image.height,
-  }
+  dispatch: Dispatch<ImageAction>
 }
 
 const bound = (value: number, max: number, min: number) => Math.min(Math.max(min, value), max)
@@ -76,43 +67,35 @@ const ASPECTS_RATIOS: Point[] = [
   },
 ]
 
-type TranslateObj = {
-  x: number
-  y: number
-  scale: number
-}
+export const ImageCrop: FC<ImageCropProps> = ({ className, images, dispatch }) => {
+  const [imageKey, setImageKey] = useState(Object.keys(images)[0])
 
-export const ImageCrop: FC<ImageCropProps> = ({ className, images }) => {
-  const firstImage = Object.values(images)[0]
+  const currentImage = images[imageKey]
 
   const [isGrabbing, setIsGrabbing] = useState(false)
 
   const picRef = useRef<HTMLDivElement>(null)
+  const viewportRef = useRef<HTMLDivElement>(null)
   const mouseInitialPosition = useRef<Point>({ x: 0, y: 0 })
 
-  const [aspectRatio, setAspectRatio] = useState<Point>(ASPECTS_RATIOS[2])
+  const localTranslate = useRef<CropData>(currentImage.crop)
+  const picPrevTranslate = useRef<CropData>(currentImage.crop)
 
-  const picTranslate = useRef<TranslateObj>({
-    x: 0,
-    y: 0,
-    scale: 1,
-  })
-  const picPrevTranslate = useRef<TranslateObj>(picTranslate.current)
-
-  const applyTranslate = (newTranslateObj: Partial<TranslateObj>) => {
+  const applyTranslate = (newTranslateObj: Partial<CropData>) => {
     if (picRef.current) {
-      const newTranslate = { ...picTranslate.current, ...newTranslateObj }
-      picTranslate.current = newTranslate
+      const newTranslate = { ...currentImage.crop, ...newTranslateObj }
       const { x, y, scale } = newTranslate
+      localTranslate.current = newTranslate
       picRef.current.style.transform = `translate3d(${x}px, ${y}px, 0px) scale(${scale})`
     }
   }
-
-  const setTranslation = ({ x, y }: Point) => {
-    applyTranslate({ x, y })
-  }
-
-  const viewPortRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    // synchronizing with new pic
+    applyTranslate({})
+    picPrevTranslate.current = currentImage.crop
+    localTranslate.current = currentImage.crop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imageKey])
 
   const beginMove = (e: MouseEvent) => {
     setIsGrabbing(true)
@@ -123,8 +106,8 @@ export const ImageCrop: FC<ImageCropProps> = ({ className, images }) => {
   }
 
   const handleMove = (e: MouseEvent) => {
-    if (isGrabbing && picRef.current && viewPortRef.current) {
-      const boundary = getBoundary(picRef.current, viewPortRef.current)
+    if (isGrabbing && picRef.current && viewportRef.current) {
+      const boundary = getBoundary(picRef.current, viewportRef.current)
 
       const x = softMaxFn(
         picPrevTranslate.current.x + e.clientX - mouseInitialPosition.current.x,
@@ -136,7 +119,7 @@ export const ImageCrop: FC<ImageCropProps> = ({ className, images }) => {
         boundary.minY,
         boundary.maxY
       )
-      setTranslation({ x, y })
+      applyTranslate({ x, y })
     }
   }
 
@@ -144,22 +127,25 @@ export const ImageCrop: FC<ImageCropProps> = ({ className, images }) => {
     if (!isGrabbing) {
       return
     }
+    // flushing before applyTranslate to enable transition
     flushSync(() => {
       setIsGrabbing(false)
     })
-    const boundary = getBoundary(picRef.current!, viewPortRef.current!)
-    setTranslation({
-      x: bound(picTranslate.current.x, boundary.maxX, boundary.minX),
-      y: bound(picTranslate.current.y, boundary.maxY, boundary.minY),
-    })
-    picPrevTranslate.current = picTranslate.current
+    const boundary = getBoundary(picRef.current!, viewportRef.current!)
+    const newCropData = {
+      x: bound(localTranslate.current.x, boundary.maxX, boundary.minX),
+      y: bound(localTranslate.current.y, boundary.maxY, boundary.minY),
+    }
+    applyTranslate(newCropData)
+    picPrevTranslate.current = localTranslate.current
+    dispatch({ type: "SET_CROP", crop: newCropData, id: imageKey })
   }
 
   const { ref: containerRef, width = 1, height = 1 } = useResizeObserver<HTMLDivElement>()
 
-  const { heightToWidth, widthToHeight } = getImageAspectRatio(firstImage.base64url)
-
   const [openControl, setOpenControl] = useState<string>()
+
+  const aspectRatio = currentImage.aspectRatio
 
   return (
     <div
@@ -168,7 +154,7 @@ export const ImageCrop: FC<ImageCropProps> = ({ className, images }) => {
       className={classnames("flex h-full w-full aspect-square justify-center items-center relative", className)}
     >
       <div
-        ref={viewPortRef}
+        ref={viewportRef}
         id="viewport"
         className={classnames(
           "overflow-hidden relative flex justify-center items-center",
@@ -184,8 +170,10 @@ export const ImageCrop: FC<ImageCropProps> = ({ className, images }) => {
           id="image"
           ref={picRef}
           style={{
-            backgroundImage: `url(${firstImage.base64url})`,
+            backgroundImage: `url(${currentImage.base64url})`,
             ...(() => {
+              const widthToHeight = currentImage.originalAspectRatio.x / currentImage.originalAspectRatio.y
+              const heightToWidth = currentImage.originalAspectRatio.y / currentImage.originalAspectRatio.x
               if (aspectRatio.y > aspectRatio.x) {
                 return {
                   width: height * widthToHeight,
@@ -252,7 +240,7 @@ export const ImageCrop: FC<ImageCropProps> = ({ className, images }) => {
                   "bg-transparent !text-white p-4 w-24 text-right group-hover:!bg-gray-50/20 opacity-60",
                   aspectRatio.x === x && aspectRatio.y === y && "!opacity-100"
                 )}
-                onClick={() => setAspectRatio({ x, y })}
+                onClick={() => dispatch({ type: "SET_ASPECT_RATIO", aspectRatio: { x, y }, id: imageKey })}
               >
                 {x}:{y}
               </Button>
@@ -268,8 +256,11 @@ export const ImageCrop: FC<ImageCropProps> = ({ className, images }) => {
         >
           <div>
             <Slider
-              initialValue={picTranslate.current.scale}
-              onChange={(scale) => applyTranslate({ scale })}
+              value={currentImage.crop.scale}
+              onChange={(scale) => {
+                applyTranslate({ scale })
+                dispatch({ type: "SET_CROP", crop: { scale }, id: imageKey })
+              }}
               min={1}
               max={2}
             />
@@ -283,7 +274,33 @@ export const ImageCrop: FC<ImageCropProps> = ({ className, images }) => {
           name="ImageSwitch"
           menuClassName="right-0"
         >
-          <div>Hello</div>
+          <div className="flex p-2 space-x-2">
+            {Object.entries(images).map(([id, image]) => (
+              <div key={id} className="relative">
+                <IconButton
+                  className="absolute right-2 top-2"
+                  onClick={() => {
+                    if (imageKey === id) {
+                      const keys = Object.keys(images)
+                      const currentImageIndex = keys.findIndex((i) => i === id)
+                      setImageKey(keys[currentImageIndex > 0 ? currentImageIndex - 1 : keys.length + 1])
+                    }
+                    dispatch({ type: "REMOVE", id })
+                  }}
+                >
+                  X
+                </IconButton>
+                <ButtonBase onClick={() => setImageKey(id)}>
+                  <div
+                    className="block w-24 h-24 bg-cover bg-no-repeat bg-center"
+                    style={{
+                      backgroundImage: `url(${image.base64url})`,
+                    }}
+                  ></div>
+                </ButtonBase>
+              </div>
+            ))}
+          </div>
         </EditMenu>
       </div>
     </div>
@@ -325,7 +342,7 @@ const EditMenu = ({ className, Icon, children, openControl, name, setOpenControl
         className={classnames(
           "bg-gray-900/80 rounded-md  my-2 text-white shadow-md",
           "absolute bottom-full transform transition-all",
-          !isOpen && "opacity-0 translate-y-1",
+          !isOpen && "opacity-0 translate-y-1 pointer-events-none",
           isOpen && "opacity-100 translate-y-0",
           menuClassName
         )}
