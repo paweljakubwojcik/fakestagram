@@ -10,6 +10,7 @@ import { ArrowLeft } from "react-feather"
 import { toBase64 } from "utils/to-base-64"
 import { v4 as uuid } from "uuid"
 import { ImageCrop } from "./image-crop/image-crop"
+import { cropImage } from "./image-crop/utils"
 
 type CreatePostProps = ComponentPropsWithoutRef<"div"> & ComponentProps<typeof Modal>
 
@@ -68,7 +69,12 @@ export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, ...pro
                   <ArrowLeft />
                 </IconButton>
                 <div>Crop</div>
-                <Button className="py-1" onClick={() => stepDispatch({ type: "SET", step: "META" })}>
+                <Button
+                  className="py-1"
+                  onClick={async () => {
+                    window.open(await cropImage(Object.values(images)[0]), '_blank')
+                  }}
+                >
                   Next
                 </Button>
               </div>

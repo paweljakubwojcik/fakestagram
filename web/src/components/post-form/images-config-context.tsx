@@ -1,5 +1,6 @@
 import produce from "immer"
 import { createContext, Dispatch, useContext } from "react"
+import { Point } from "types"
 import { getImageAspectRatio } from "utils/get-image-aspect-ratio"
 import { toBase64 } from "utils/to-base-64"
 import { v4 as uuid } from "uuid"

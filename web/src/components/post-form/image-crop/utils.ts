@@ -1,3 +1,4 @@
+import { Point } from "types"
 import { AspectRatio, EditableImage } from "../images-config-context"
 
 export const bound = (value: number, max: number, min: number) => Math.min(Math.max(min, value), max)
@@ -61,4 +62,55 @@ export const getWidthAndHeight = ({ aspectRatio, originalAspectRatio, width, hei
       }
     }
   }
+  return {
+    width: 0,
+    height: 0,
+  }
+}
+
+export const cropImage = ({
+  base64url: src,
+  aspectRatio,
+  crop: { scale, x, y },
+  originalAspectRatio,
+}: EditableImage) => {
+  const { x: originalWidth, y: originalHeight } = originalAspectRatio
+  const canvas = document.createElement("canvas")
+
+  const ctx = canvas.getContext("2d")
+
+  const image = new Image()
+  image.src = src
+
+  let width = originalWidth
+  let height = originalHeight
+
+  if (aspectRatio.x < aspectRatio.y) {
+    width = (aspectRatio.x / aspectRatio.y) * height
+  }
+  if (aspectRatio.x > aspectRatio.y) {
+    height = (aspectRatio.y / aspectRatio.x) * width
+  }
+  if (aspectRatio.x === aspectRatio.y) {
+    if (width > height) {
+      width = (aspectRatio.x / aspectRatio.y) * height
+    }
+    if (width <= height) {
+      height = (aspectRatio.y / aspectRatio.x) * width
+    }
+  }
+
+  let sx = -((width - originalWidth * scale) / 2 + x) / scale
+  let sy = -((height - originalHeight * scale) / 2 + y) / scale
+
+  canvas.width = width
+  canvas.height = height
+
+  return new Promise<string>((res) => {
+    image.onload = function () {
+      ctx?.drawImage(image, sx, sy, width / scale, height / scale, 0, 0, width, height)
+      const url = canvas.toDataURL("image/jpeg", 1)
+      res(url)
+    }
+  })
 }

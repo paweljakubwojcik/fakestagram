@@ -14,6 +14,7 @@ export const ImageCrop: FC<ImageCropProps> = ({ className }) => {
   const [imageKey, setImageKey] = useState(Object.keys(images)[0])
 
   const currentImage = images[imageKey]
+  const aspectRatio = currentImage.aspectRatio
 
   const [isGrabbing, setIsGrabbing] = useState(false)
 
@@ -23,10 +24,23 @@ export const ImageCrop: FC<ImageCropProps> = ({ className }) => {
 
   const localTranslate = useRef<CropData>(currentImage.crop)
   const picPrevTranslate = useRef<CropData>(currentImage.crop)
+  const { ref: containerRef, width = 1, height = 1 } = useResizeObserver<HTMLDivElement>()
+
+  const imageSizeOnScreen = getWidthAndHeight({
+    aspectRatio,
+    originalAspectRatio: currentImage.originalAspectRatio,
+    width,
+    height,
+  })
 
   const applyTranslate = (newTranslateObj: Partial<CropData>) => {
     if (picRef.current) {
-      const newTranslate = { ...currentImage.crop, ...newTranslateObj }
+      const screenSizeCropData = {
+        x: (currentImage.crop.x * imageSizeOnScreen.width) / currentImage.originalAspectRatio.x,
+        y: (currentImage.crop.y * imageSizeOnScreen.height) / currentImage.originalAspectRatio.y,
+        scale: currentImage.crop.scale
+      }
+      const newTranslate = { ...screenSizeCropData, ...newTranslateObj }
       const { x, y, scale } = newTranslate
       localTranslate.current = newTranslate
       picRef.current.style.transform = `translate3d(${x}px, ${y}px, 0px) scale(${scale})`
@@ -34,9 +48,14 @@ export const ImageCrop: FC<ImageCropProps> = ({ className }) => {
   }
   useEffect(() => {
     // synchronizing with new pic
+    const screenSizeCropData = {
+      x: (currentImage.crop.x * imageSizeOnScreen.width) / currentImage.originalAspectRatio.x,
+      y: (currentImage.crop.y * imageSizeOnScreen.height) / currentImage.originalAspectRatio.y,
+      scale: currentImage.crop.scale
+    }
+    picPrevTranslate.current = screenSizeCropData
+    localTranslate.current = screenSizeCropData
     applyTranslate({})
-    picPrevTranslate.current = currentImage.crop
-    localTranslate.current = currentImage.crop
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [imageKey])
 
@@ -81,12 +100,12 @@ export const ImageCrop: FC<ImageCropProps> = ({ className }) => {
     }
     applyTranslate(newCropData)
     picPrevTranslate.current = localTranslate.current
-    dispatch({ type: "SET_CROP", crop: newCropData, id: imageKey })
+    const realSizeCropData = {
+      x: (newCropData.x * currentImage.originalAspectRatio.x) / imageSizeOnScreen.width,
+      y: (newCropData.y * currentImage.originalAspectRatio.y) / imageSizeOnScreen.height,
+    }
+    dispatch({ type: "SET_CROP", crop: realSizeCropData, id: imageKey })
   }
-
-  const { ref: containerRef, width = 1, height = 1 } = useResizeObserver<HTMLDivElement>()
-
-  const aspectRatio = currentImage.aspectRatio
 
   return (
     <div
@@ -112,7 +131,7 @@ export const ImageCrop: FC<ImageCropProps> = ({ className }) => {
           ref={picRef}
           style={{
             backgroundImage: `url(${currentImage.base64url})`,
-            ...getWidthAndHeight({ aspectRatio, originalAspectRatio: currentImage.originalAspectRatio, width, height }),
+            ...imageSizeOnScreen,
           }}
           className={classnames(
             "block bg-cover bg-no-repeat bg-center cursor-grab origin-center flex-shrink-0",
