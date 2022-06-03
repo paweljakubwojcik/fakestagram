@@ -114,7 +114,7 @@ export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, ...pro
           </div>
         </>
       }
-      className="w-1/2 min-w-[350px] max-w-3xl min-h-fit max-h-full m-10 overflow-hidden"
+      className="w-full max-w-3xl min-h-fit max-h-full m-10 overflow-hidden"
       onClose={() => {
         if (isEmpty(images)) {
           handleClose()
@@ -130,7 +130,6 @@ export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, ...pro
       <Head>
         <title>Create new post | Fakestagram</title>
       </Head>
-
       {uploading && (
         <div className="p-4 w-full h-full aspect-square">
           <FileUpload onChange={handleAddFiles} />

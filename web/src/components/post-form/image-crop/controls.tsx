@@ -74,7 +74,7 @@ export const Controls: FC<ControlsProps> = ({ className, applyTranslate }) => {
             value={currentImage.crop.scale}
             onChange={(scale) => {
               applyTranslate({ scale })
-              dispatch(setCrop)
+              dispatch(setCrop({ crop: { scale } }))
             }}
             min={1}
             max={2}

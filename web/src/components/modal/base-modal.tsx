@@ -29,10 +29,10 @@ export const BaseModal: FC<ModalProps> = ({ className, children, open, title, on
             <X className="w-8 h-8" />
           </IconButton>
           <Card className={classnames("animate-appear rounded-3xl overflow-hidden dark:!bg-gray-800", className)}>
-            <header ref={ref} className="border-b w-full p-4 py-2 text-center font-semibold dark:text-white">
+            <header ref={ref} className="border-b dark:!border-gray-300/20 w-full p-4 py-2 text-center font-semibold dark:text-white">
               {title}
             </header>
-            <div className="w-full" style={{ minHeight: `calc(100% - ${height}px)` }}>
+            <div className="" style={{ height: `calc(100% - ${height}px)` }}>
               {children}
             </div>
           </Card>

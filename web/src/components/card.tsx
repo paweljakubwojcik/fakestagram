@@ -9,7 +9,7 @@ export const Card: FC<CardProps> = forwardRef(
   ({ className, children, component = "div", ...props }, ref: ForwardedRef<ElementType>) => {
     return createElement<CardProps>(
       component,
-      { className: classnames("bg-white dark:bg-black flex flex-col border rounded-sm m-3 dark:border-gray-800", className), ref, ...props },
+      { className: classnames("bg-white dark:bg-black flex flex-col border rounded-sm m-3 dark:!border-gray-300/20", className), ref, ...props },
       children
     )
   }

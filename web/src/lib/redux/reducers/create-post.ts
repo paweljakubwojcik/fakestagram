@@ -25,6 +25,7 @@ export type EditableImage = {
 export type PostFormSlice = {
   images: Record<string, EditableImage>
   currentImage: string
+  description: string
 }
 
 export const createImageConfig = async (file: File): Promise<EditableImage> => {
@@ -48,6 +49,7 @@ const emptyImageConfig = {
 const initialState: PostFormSlice = {
   images: {},
   currentImage: "",
+  description: "",
 }
 
 export const { reducer: postFormReducer, actions: postFormActions } = createSlice({
@@ -60,7 +62,7 @@ export const { reducer: postFormReducer, actions: postFormActions } = createSlic
       draft.currentImage = Object.keys(newImages)[0]
     },
     remove: (draft, { payload: { id } }: PayloadAction<{ id: string }>) => {
-      // if we attemt to delete current pic, change it to nearest avaiable pic
+      // if we attempt to delete current pic, change it to nearest available pic
       if (draft.currentImage === id) {
         const keys = Object.keys(draft.images)
         const currentImageIndex = keys.findIndex((i) => i === id)

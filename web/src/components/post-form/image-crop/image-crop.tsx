@@ -1,16 +1,19 @@
 import classnames from "classnames"
 import { useAppDispatch, useAppSelector } from "lib/redux/hooks"
 import { CropData, postFormActions, postFormSelectors } from "lib/redux/reducers/create-post"
-import { ComponentPropsWithoutRef, FC, MouseEvent, useEffect, useRef, useState } from "react"
+import { ComponentPropsWithoutRef, FC, ForwardedRef, MouseEvent, useEffect, useRef, useState } from "react"
 import { flushSync } from "react-dom"
 import { Point } from "types"
 import useResizeObserver from "use-resize-observer"
+import { mergeRefs } from "utils/merge-refs"
 import { Controls } from "./controls"
 import { bound, getBoundary, getWidthAndHeight, softMaxFn } from "./utils"
 
-type ImageCropProps = ComponentPropsWithoutRef<"div">
+type ImageCropProps = ComponentPropsWithoutRef<"div"> & {
+  innerRef?: ForwardedRef<HTMLDivElement>
+}
 
-export const ImageCrop: FC<ImageCropProps> = ({ className }) => {
+export const ImageCrop: FC<ImageCropProps> = ({ className, innerRef }) => {
   const dispatch = useAppDispatch()
   const { setCrop } = postFormActions
 
@@ -113,8 +116,8 @@ export const ImageCrop: FC<ImageCropProps> = ({ className }) => {
   return (
     <div
       id="container"
-      ref={containerRef}
-      className={classnames("flex h-full w-full aspect-square justify-center items-center relative", className)}
+      ref={mergeRefs(containerRef, innerRef)}
+      className={classnames("flex h-full aspect-square justify-center items-center relative", className)}
     >
       <div
         ref={viewportRef}

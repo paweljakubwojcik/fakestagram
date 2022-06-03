@@ -82,7 +82,6 @@
     animation: opacity 0.2s linear;
   }
 
-
   .error-text {
     @apply text-rose-700;
     @apply dark:text-rose-400;
