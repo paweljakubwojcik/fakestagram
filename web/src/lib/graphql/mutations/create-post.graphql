@@ -1,0 +1,5 @@
+mutation CreatePost($description: String! , $images: [String]!) {
+	createPost(description: $description, images: $images) {
+		...BasicPostFragment
+	}
+}

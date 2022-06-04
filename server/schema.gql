@@ -23,7 +23,7 @@ type Image {
   id: String!
   post: Post!
   updatedAt: DateTime!
-  url: UrlsSet!
+  url: UrlSet!
 }
 
 type Like {
@@ -33,26 +33,25 @@ type Like {
 }
 
 type Mutation {
-  createPost(body: String!, title: String!): Post!
+  createPost(description: String!, images: [String!]!): Post!
   deletePost(id: String!): Boolean!
   dislikePost(post: String!): Boolean!
   likePost(post: String!): Boolean!
   login(credentials: Credentials!): User!
   logout: Boolean!
   register(credentials: Credentials!): User!
-  updatePost(body: String, id: String!, title: String): Post
+  updatePost(description: String, id: String!): Post
 }
 
 type Post {
-  body: String!
   createdAt: DateTime!
   creator: User!
+  description: String!
   id: String!
   images: [Image!]!
   likeCount: Float!
   likedByMe: Boolean!
   likes: [Like!]!
-  title: String!
   updatedAt: DateTime!
 }
 
@@ -81,9 +80,10 @@ type Query {
   post(id: ID!): Post
   posts(after: ID, before: ID, first: Float, last: Float, sort: PostSort = createdAt): PostConnection!
   signedUrl(filename: String!): String!
+  signedUrls(filenames: [String!]!): [String!]!
 }
 
-type UrlsSet {
+type UrlSet {
   large: String!
   medium: String!
   original: String!

@@ -15,28 +15,24 @@ import { User } from "./user"
 export class Post extends BaseEntity {
   @Field()
   @Property({ type: "text" })
-  title: string = ""
-
-  @Field()
-  @Property({ type: "text" })
-  body: string = ""
+  description: string = ""
 
   @Field()
   @ManyToOne()
-  creator: User
+  readonly creator: User
 
   @OneToMany(() => Like, "post")
   likes = new Collection<Like>(this)
 
   @Field(() => [Image])
   @OneToMany(() => Image, "post")
-  images: Collection<Image, this>
+  readonly images: Collection<Image, this>
 
   constructor(images: string[]) {
     super()
     this.images = new Collection(
       this,
-      images.map((url) => new Image(url))
+      images.map((url) => new Image({ post: this, originalUrl: url }))
     )
   }
 }

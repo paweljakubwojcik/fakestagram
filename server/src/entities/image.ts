@@ -1,27 +1,46 @@
-import {
-    Cascade,
-    Entity,
-    ManyToOne,
-    OneToOne
-} from "@mikro-orm/core"
-import { Field, ObjectType } from "type-graphql"
+import { Entity, ManyToOne, Property } from "@mikro-orm/core"
+import { Field, ObjectType, Root } from "type-graphql"
 import { BaseEntity } from "./base-entity"
 import { Post } from "./post"
-import { UrlsSet } from "./urls-set"
+
+@ObjectType()
+class UrlSet {
+  @Field()
+  original: string
+
+  @Field()
+  small: string
+  @Field()
+  medium: string
+  @Field()
+  large: string
+}
 
 @ObjectType()
 @Entity()
 export class Image extends BaseEntity {
-  constructor(url: string) {
+  constructor(data: Partial<Image>) {
     super()
-    this.url = new UrlsSet(url)
+    Object.assign(this, data)
   }
 
-  @Field()
-  @OneToOne(() => UrlsSet, "image", { cascade: [Cascade.ALL] })
-  url: UrlsSet
+  @Property({
+    default:
+      "https://instaclone.imgix.net/instaclone-posts/FSOTUDlaUAAnChz.jpg",
+  })
+  originalUrl: string
 
   @Field(() => Post)
   @ManyToOne(() => Post)
   post: Post
+
+  @Field(() => UrlSet)
+  url(@Root() image: Image): UrlSet {
+    return {
+      original: image.originalUrl,
+      large: image.originalUrl,
+      medium: image.originalUrl,
+      small: image.originalUrl,
+    }
+  }
 }

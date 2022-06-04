@@ -18,7 +18,7 @@ export default {
         safe: false, // allow to disable table and column dropping
         emit: 'ts', // migration generation mode
     },
-    dbName: 'redditclone',
+    dbName: 'instaclone',
     user: 'postgres',
     password: 'password',
     debug: !__prod__,

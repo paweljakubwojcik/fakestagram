@@ -1,0 +1,16 @@
+fragment BasicPostFragment on Post {
+  id
+  createdAt
+  updatedAt
+  description
+  images {
+    id
+    url {
+      original
+    }
+  }
+  creator {
+    id
+    username
+  }
+}

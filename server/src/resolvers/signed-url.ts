@@ -8,4 +8,10 @@ export class SignedUrl {
   signedUrl(@Arg("filename", {}) filename: string) {
     return generateV4UploadSignedUrl({ filename })
   }
+
+  @UseMiddleware(isAuth)
+  @Query(() => [String])
+  signedUrls(@Arg("filenames", () => [String]) filenames: string[]) {
+    return filenames.map(filename => generateV4UploadSignedUrl({ filename }))
+  }
 }

@@ -24,20 +24,17 @@ import {
 } from "type-graphql"
 
 @ArgsType()
-class AddPostInput implements Partial<Post> {
+class AddPostInput {
   @Field()
-  title: string
+  description: string
 
-  @Field()
-  body: string
+  @Field(() => [String])
+  images: string[]
 }
 @ArgsType()
 class UpdatePostInput implements Partial<Post> {
   @Field({ nullable: true })
-  title?: string
-
-  @Field({ nullable: true })
-  body?: string
+  description?: string
 }
 
 enum PostSort {
@@ -55,7 +52,7 @@ export class PostResolver {
     @Arg("id", () => ID) id: string,
     @Ctx() { em }: MyContext
   ): Promise<Post | null> {
-    return em.findOne(Post, { id })
+    return em.findOne(Post, { id }, { populate: ["images"] })
   }
 
   @PaginatedQuery(Post)
@@ -63,7 +60,10 @@ export class PostResolver {
     @Ctx() { em }: MyContext,
     @RelayArgs(PostSort) paginationArgs: RelayPaginationArgs<PostSort>
   ): Promise<RelayResponse<Post>> {
-    const Query = em.qb(Post).select(["*"])
+    const Query = em
+      .qb(Post)
+      .select(["*"])
+      .populate([{ field: "images" }])
     return getRelayResult(Query, paginationArgs)
   }
 
