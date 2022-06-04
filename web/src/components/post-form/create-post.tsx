@@ -75,13 +75,16 @@ export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, ...pro
       },
       nextAction: async () => {
         setLoading(true)
-        await Promise.all(
-          Object.entries(images).map(([id, image]) => {
-            return new Promise(async (res) => {
-              dispatch(setCroppedUrl({ url: await cropImage(image), id }))
-              res(true)
-            })
-          })
+        // await Promise.all(
+        //   Object.entries(images).map(([id, image]) => {
+        //     return new Promise(async (res) => {
+        //       dispatch()
+        //       res(true)
+        //     })
+        //   })
+        // )
+        Object.entries(images).forEach(async ([id, image]) =>
+          dispatch(setCroppedUrl({ url: await cropImage(image), id }))
         )
         stepDispatch({ type: "SET", step: "META" })
         setLoading(false)

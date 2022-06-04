@@ -12,6 +12,8 @@ import micrOrmConfig from "./mikro-orm.config"
 import { resolvers } from "./resolvers/index"
 import { MyContext } from "./types/context"
 import cors from "cors"
+
+
 ;(async () => {
   const orm = await MikroORM.init<AbstractSqlDriver<AbstractSqlConnection>>(
     micrOrmConfig
@@ -43,7 +45,7 @@ import cors from "cors"
         disableTouch: true,
       }),
       saveUninitialized: false,
-      secret: "Your'e a wizard Harry", //TODO: hide this
+      secret: process.env.SESSION_SECRET!,
       resave: false,
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years

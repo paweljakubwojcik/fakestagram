@@ -29,3 +29,8 @@ export const PostMetaForm: FC<PostMetaFormProps> = ({ className, innerRef }) => 
     </div>
   )
 }
+
+export const PostMetaFormHeader = () => {
+  
+}
+

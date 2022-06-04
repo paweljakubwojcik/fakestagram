@@ -18,6 +18,14 @@ type Edge {
   node: Post
 }
 
+type Image {
+  createdAt: DateTime!
+  id: String!
+  post: Post!
+  updatedAt: DateTime!
+  url: UrlsSet!
+}
+
 type Like {
   createdAt: DateTime!
   updatedAt: DateTime!
@@ -40,6 +48,7 @@ type Post {
   createdAt: DateTime!
   creator: User!
   id: String!
+  images: [Image!]!
   likeCount: Float!
   likedByMe: Boolean!
   likes: [Like!]!
@@ -71,6 +80,14 @@ type Query {
   me: User
   post(id: ID!): Post
   posts(after: ID, before: ID, first: Float, last: Float, sort: PostSort = createdAt): PostConnection!
+  signedUrl(filename: String!): String!
+}
+
+type UrlsSet {
+  large: String!
+  medium: String!
+  original: String!
+  small: String!
 }
 
 type User {

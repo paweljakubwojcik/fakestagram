@@ -1,17 +1,10 @@
-import {
-  Entity,
-  OptionalProps,
-  PrimaryKey,
-  Property,
-} from "@mikro-orm/core"
+import { Entity, OptionalProps, PrimaryKey, Property } from "@mikro-orm/core"
 import { Field, ObjectType } from "type-graphql"
 import { v4 } from "uuid"
-
 
 @ObjectType()
 @Entity({ abstract: true })
 export abstract class BaseEntityWithoutId {
-
   @Field()
   @Property()
   createdAt: Date = new Date()
@@ -21,7 +14,6 @@ export abstract class BaseEntityWithoutId {
   updatedAt: Date = new Date();
 
   [OptionalProps]: "createdAt" | "updatedAt"
-
 }
 
 @ObjectType()
@@ -30,5 +22,12 @@ export abstract class BaseEntity extends BaseEntityWithoutId {
   @Field()
   @PrimaryKey()
   readonly id: string = v4()
+}
 
+@ObjectType()
+@Entity({ abstract: true })
+export abstract class BaseEntityWithOnlyId {
+  @Field()
+  @PrimaryKey()
+  readonly id: string = v4()
 }
