@@ -2,8 +2,8 @@ import { BasicPostFragmentFragment, LikesFragmentDoc, useLikeOrDislikePostMutati
 import classnames from "classnames"
 import { formatDistanceToNow } from "date-fns"
 import Image from "next/image"
-import type { ComponentPropsWithoutRef, FC } from "react"
-import { Heart, MessageCircle, MoreHorizontal, Pocket, Send } from "react-feather"
+import { ComponentPropsWithoutRef, FC, useState } from "react"
+import { ArrowLeftCircle, ArrowRightCircle, Heart, MessageCircle, MoreHorizontal, Pocket, Send } from "react-feather"
 import { Avatar } from "./avatar"
 import { IconButton } from "./buttons"
 import { Card } from "./card"
@@ -39,6 +39,9 @@ export const PostCard: FC<PostCardProps> = ({ className, post }) => {
     }),
   })
 
+  const [activeIndex, setActiveIndex] = useState(0)
+  const hasCarousel = images.length > 1
+
   return (
     <Card className={classnames("flex-col flex text-base", className)}>
       <header className="flex items-center p-4">
@@ -48,11 +51,51 @@ export const PostCard: FC<PostCardProps> = ({ className, post }) => {
           <MoreHorizontal />
         </IconButton>
       </header>
-      <div className="relative w-full" style={{ aspectRatio }}>
-        <Image src={images[0].url.original} alt={"image"} layout={"fill"} objectFit={"cover"} />
+      <div className="relative w-full flex flex-col justify-center overflow-hidden border-y dark:border-gray-300/30" style={{ aspectRatio }}>
+        {images.map(({ url, id }, i) => (
+          <div
+            key={id}
+            className="transition-transform duration-500 absolute w-full h-full"
+            style={{ transform: `translateX(${i - activeIndex}00%)` }}
+          >
+            <Image src={url.original} alt={"image"} layout={"fill"} objectFit={"cover"} />
+          </div>
+        ))}
+        {hasCarousel && (
+          <div className="absolute flex w-full justify-between p-4 opacity-60">
+            <IconButton
+              onClick={() => setActiveIndex((i) => i - 1)}
+              className={classnames(activeIndex === 0 && "invisible")}
+            >
+              <ArrowLeftCircle size={40} />
+            </IconButton>
+            <IconButton
+              onClick={() => setActiveIndex((i) => i + 1)}
+              className={classnames(activeIndex === images.length - 1 && "invisible")}
+            >
+              <ArrowRightCircle size={40} />
+            </IconButton>
+          </div>
+        )}
       </div>
-      <div className="px-4 py-2 space-y-2">
-        <div className="flex py-3 child:mr-2">
+      <div className="px-4 py-2 space-y-2 relative">
+        {hasCarousel && (
+          <div className="absolute flex top-4 w-full justify-center space-x-2">
+            {images.map((_, i) => (
+              <div
+                role="button"
+                key={i}
+                className={classnames(
+                  "block w-2 aspect-square rounded-full cursor-pointer",
+                  i !== activeIndex && "bg-gray-300",
+                  i === activeIndex && "bg-primary"
+                )}
+                onClick={() => setActiveIndex(i)}
+              />
+            ))}
+          </div>
+        )}
+        <div className="flex child:mr-2">
           <IconButton
             active={likedByMe}
             onClick={async () => {
