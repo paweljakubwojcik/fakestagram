@@ -1,5 +1,6 @@
 import { ApolloError, UserInputError } from "apollo-server-core"
 import { PaginatedQuery, RelayArgs } from "src/decorators/paginated-query"
+import { Image } from "src/entities/image"
 import { Like } from "src/entities/like"
 import { Post } from "src/entities/post"
 import { User } from "src/entities/user"
@@ -52,7 +53,7 @@ export class PostResolver {
     @Arg("id", () => ID) id: string,
     @Ctx() { em }: MyContext
   ): Promise<Post | null> {
-    return em.findOne(Post, { id }, { populate: ["images"] })
+    return em.findOne(Post, { id })
   }
 
   @PaginatedQuery(Post)
@@ -63,7 +64,6 @@ export class PostResolver {
     const Query = em
       .qb(Post)
       .select(["*"])
-      .populate([{ field: "images" }])
     return getRelayResult(Query, paginationArgs)
   }
 
@@ -151,6 +151,11 @@ export class PostResolver {
   @FieldResolver()
   async creator(@Root() post: Post, @Ctx() { em }: MyContext) {
     return await em.findOne(User, { id: post.creator.id })
+  }
+
+  @FieldResolver()
+  async images(@Root() post: Post, @Ctx() { em }: MyContext) {
+    return await em.find(Image, { post: post.id })
   }
 
   @FieldResolver(() => [Like])
