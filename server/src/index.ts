@@ -12,9 +12,12 @@ import micrOrmConfig from "./mikro-orm.config"
 import { resolvers } from "./resolvers/index"
 import { MyContext } from "./types/context"
 import cors from "cors"
+import { configureBucketCors } from "./lib/cloud-storage"
 
 
 ;(async () => {
+
+
   const orm = await MikroORM.init<AbstractSqlDriver<AbstractSqlConnection>>(
     micrOrmConfig
   )
@@ -69,4 +72,7 @@ import cors from "cors"
 
   await new Promise<void>((resolve) => app.listen({ port: 4000 }, resolve))
   console.log("server running on http://localhost:4000/graphql")
+
+  await configureBucketCors()
+
 })()

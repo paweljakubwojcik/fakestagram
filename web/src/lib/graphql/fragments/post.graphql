@@ -10,6 +10,7 @@ fragment BasicPostFragment on Post {
     id
     url {
       original
+      small
     }
   }
   creator {

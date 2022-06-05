@@ -1,3 +1,4 @@
+import { useCreatePostMutation, useSignedUrlsLazyQuery } from "@graphql"
 import classnames from "classnames"
 import { Button, IconButton } from "components/buttons"
 import { FileUpload } from "components/file-upload"
@@ -11,6 +12,7 @@ import { ArrowLeft } from "react-feather"
 import { ImageCrop } from "./image-crop/image-crop"
 import { cropImage } from "./image-crop/utils"
 import { PostMetaForm } from "./post-meta-form"
+import axios from "axios"
 
 type CreatePostProps = ComponentPropsWithoutRef<"div"> & ComponentProps<typeof Modal>
 
@@ -60,6 +62,9 @@ export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, ...pro
 
   const [loading, setLoading] = useState(false)
 
+  const [createPost] = useCreatePostMutation({})
+  const [getUploadUrls] = useSignedUrlsLazyQuery({})
+
   const headers: Record<STEP, { title: string; backAction?: () => void; nextAction?: () => void }> = {
     UPLOADING: {
       title: "Create new post",
@@ -75,14 +80,6 @@ export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, ...pro
       },
       nextAction: async () => {
         setLoading(true)
-        // await Promise.all(
-        //   Object.entries(images).map(([id, image]) => {
-        //     return new Promise(async (res) => {
-        //       dispatch()
-        //       res(true)
-        //     })
-        //   })
-        // )
         Object.entries(images).forEach(async ([id, image]) =>
           dispatch(setCroppedUrl({ url: await cropImage(image), id }))
         )
@@ -92,8 +89,36 @@ export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, ...pro
     },
     META: {
       title: "Say something about your photo",
-      nextAction: () => {
-        console.log("publish")
+      nextAction: async () => {
+        const filenames = Object.keys(images).map((id) => `fake_image_${id}.jpg`)
+        const { data } = await getUploadUrls({
+          variables: {
+            filenames,
+          },
+        })
+        data?.signedUrls.forEach(async (url, i) => {
+          const blobData = await fetch(Object.values(images)[i].croppedUrl!).then((res) => res.blob())
+          const fileData = new File([blobData], "asasdasd", { type: "image/jpeg" })
+
+          const data = new FormData()
+          data.append("file", fileData)
+          // await fetch(url, { body: fileData, method: "PUT" })
+          await axios.put(url, blobData, {
+            headers: {
+              "Content-Type": "image/jpeg",
+            },
+            onUploadProgress: (e: ProgressEvent) => {
+              console.log(`${(e.loaded / e.total) * 100}%`)
+            },
+          })
+        })
+        await createPost({
+          variables: {
+            aspectRatio: "16/9",
+            description: "aiyrfukabym",
+            images: filenames.map((filename) => `https://instaclone.imgix.net/${filename}`),
+          },
+        })
       },
       backAction: () => stepDispatch({ type: "PREV" }),
     },

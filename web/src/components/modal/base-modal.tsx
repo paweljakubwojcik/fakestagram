@@ -18,7 +18,7 @@ export const BaseModal: FC<ModalProps> = ({ className, children, open, title, on
   return open
     ? createPortal(
         <div
-          className="fixed top-0 left-0 flex justify-center p-5 items-center w-screen h-screen bg-black/70 z-0 animate-opacity"
+          className="fixed top-0 left-0 flex justify-center p-5 items-center w-screen h-screen bg-black/70 z-50 animate-opacity"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               onClose?.()

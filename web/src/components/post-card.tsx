@@ -51,14 +51,17 @@ export const PostCard: FC<PostCardProps> = ({ className, post }) => {
           <MoreHorizontal />
         </IconButton>
       </header>
-      <div className="relative w-full flex flex-col justify-center overflow-hidden border-y dark:border-gray-300/30" style={{ aspectRatio }}>
+      <div
+        className="relative w-full flex flex-col justify-center overflow-hidden border-y dark:border-gray-300/30"
+        style={{ aspectRatio }}
+      >
         {images.map(({ url, id }, i) => (
           <div
             key={id}
             className="transition-transform duration-500 absolute w-full h-full"
             style={{ transform: `translateX(${i - activeIndex}00%)` }}
           >
-            <Image src={url.original} alt={"image"} layout={"fill"} objectFit={"cover"} />
+            <Image src={url.original} blurDataURL={url.small}  alt={"image"} layout={"fill"} objectFit={"cover"} placeholder={"blur"} />
           </div>
         ))}
         {hasCarousel && (

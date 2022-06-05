@@ -40,7 +40,7 @@ export class Image extends BaseEntity {
       original: image.originalUrl,
       large: image.originalUrl,
       medium: image.originalUrl,
-      small: image.originalUrl,
+      small: `${image.originalUrl}?w=100`,
     }
   }
 }
