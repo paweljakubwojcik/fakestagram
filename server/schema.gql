@@ -78,7 +78,7 @@ type Query {
   isUsernameAvailable(username: String!): Boolean!
   me: User
   post(id: ID!): Post
-  posts(after: ID, before: ID, first: Float, last: Float, sort: PostSort = createdAt): PostConnection!
+  posts(after: ID, before: ID, first: Int, last: Int, sort: PostSort = createdAt): PostConnection!
   signedUrl(filename: String!): String!
   signedUrls(filenames: [String!]!): [String!]!
 }

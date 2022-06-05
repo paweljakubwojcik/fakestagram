@@ -1,9 +1,9 @@
-query Posts($last: Int, $before: ID, $first: Int, $after: ID, $sort: PostSort) {
+query Posts($last: Int , $before: ID, $first: Int , $after: ID, $sort: PostSort) {
   posts(last: $last, before: $before, first: $first, after: $after, sort: $sort) {
     edges {
       cursor
       node {
-        ...PostFragment
+        ...BasicPostFragment
       }
     }
     pageInfo {
