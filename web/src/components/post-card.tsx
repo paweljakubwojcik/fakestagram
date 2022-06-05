@@ -103,7 +103,7 @@ export const PostCard: FC<PostCardProps> = ({ className, post }) => {
             active={likedByMe}
             onClick={async () => {
               try {
-                likeOrDislike()
+                likeOrDislike({})
               } catch (e) {}
             }}
           >

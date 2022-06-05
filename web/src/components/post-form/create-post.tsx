@@ -12,7 +12,7 @@ import { ArrowLeft } from "react-feather"
 import { ImageCrop } from "./image-crop/image-crop"
 import { cropImage } from "./image-crop/utils"
 import { PostMetaForm } from "./post-meta-form"
-import axios from "axios"
+import { useCreatePost } from "hooks/use-create-post"
 
 type CreatePostProps = ComponentPropsWithoutRef<"div"> & ComponentProps<typeof Modal>
 
@@ -36,7 +36,7 @@ const stepsReducer = (state: STEP, action: StepAction) => {
 
 export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, ...props }) => {
   const { setCroppedUrl, clear } = postFormActions
-  const images = useAppSelector((state) => state.postForm.images)
+  const { images, aspectRatio, description } = useAppSelector((state) => state.postForm)
   const dispatch = useAppDispatch()
 
   const handleAddFiles = async (files: File[]) => {
@@ -60,10 +60,7 @@ export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, ...pro
   const cropping = step === "CROPPING"
   const meta = step === "META"
 
-  const [loading, setLoading] = useState(false)
-
-  const [createPost] = useCreatePostMutation({})
-  const [getUploadUrls] = useSignedUrlsLazyQuery({})
+  const [createPost] = useCreatePost()
 
   const headers: Record<STEP, { title: string; backAction?: () => void; nextAction?: () => void }> = {
     UPLOADING: {
@@ -79,46 +76,16 @@ export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, ...pro
         })
       },
       nextAction: async () => {
-        setLoading(true)
         Object.entries(images).forEach(async ([id, image]) =>
           dispatch(setCroppedUrl({ url: await cropImage(image), id }))
         )
         stepDispatch({ type: "SET", step: "META" })
-        setLoading(false)
       },
     },
     META: {
       title: "Say something about your photo",
-      nextAction: async () => {
-        const filenames = Object.keys(images).map((id) => `fake_image_${id}.jpg`)
-        const { data } = await getUploadUrls({
-          variables: {
-            filenames,
-          },
-        })
-        data?.signedUrls.forEach(async (url, i) => {
-          const blobData = await fetch(Object.values(images)[i].croppedUrl!).then((res) => res.blob())
-          const fileData = new File([blobData], "asasdasd", { type: "image/jpeg" })
-
-          const data = new FormData()
-          data.append("file", fileData)
-          // await fetch(url, { body: fileData, method: "PUT" })
-          await axios.put(url, blobData, {
-            headers: {
-              "Content-Type": "image/jpeg",
-            },
-            onUploadProgress: (e: ProgressEvent) => {
-              console.log(`${(e.loaded / e.total) * 100}%`)
-            },
-          })
-        })
-        await createPost({
-          variables: {
-            aspectRatio: "16/9",
-            description: "aiyrfukabym",
-            images: filenames.map((filename) => `https://instaclone.imgix.net/${filename}`),
-          },
-        })
+      nextAction: () => {
+        createPost({ images, aspectRatio, description })
       },
       backAction: () => stepDispatch({ type: "PREV" }),
     },

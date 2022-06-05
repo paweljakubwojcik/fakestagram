@@ -16,7 +16,6 @@ export type CropData = {
 export type EditableImage = {
   base64url: string
   crop: CropData
-  aspectRatio: AspectRatio
   originalAspectRatio: AspectRatio
   originalSize?: Point
   croppedUrl?: string
@@ -26,6 +25,7 @@ export type PostFormSlice = {
   images: Record<string, EditableImage>
   currentImage: string
   description: string
+  aspectRatio: AspectRatio
 }
 
 export const createImageConfig = async (file: File): Promise<EditableImage> => {
@@ -35,13 +35,11 @@ export const createImageConfig = async (file: File): Promise<EditableImage> => {
   return {
     base64url,
     crop: { x: 0, y: 0, scale: 1 },
-    aspectRatio,
     originalAspectRatio: aspectRatio,
   }
 }
 
 const emptyImageConfig = {
-  aspectRatio: { x: 0, y: 0 },
   crop: { x: 0, y: 0, scale: 0 },
   originalAspectRatio: { x: 0, y: 0 },
 }
@@ -50,6 +48,7 @@ const initialState: PostFormSlice = {
   images: {},
   currentImage: "",
   description: "",
+  aspectRatio: { x: 1, y: 1 },
 }
 
 export const { reducer: postFormReducer, actions: postFormActions } = createSlice({
@@ -80,7 +79,7 @@ export const { reducer: postFormReducer, actions: postFormActions } = createSlic
       Object.assign(draft.images[draft.currentImage].crop, crop)
     },
     setAspectRatio: (draft, { payload: { aspectRatio } }: PayloadAction<{ aspectRatio: AspectRatio }>) => {
-      Object.assign(draft.images[draft.currentImage].aspectRatio, aspectRatio)
+      draft.aspectRatio = aspectRatio
     },
     setCroppedUrl: (draft, { payload: { url, id } }: PayloadAction<{ id: string; url: string }>) => {
       draft.images[id].croppedUrl = url
