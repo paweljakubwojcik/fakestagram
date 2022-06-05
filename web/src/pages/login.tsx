@@ -43,7 +43,7 @@ const Login: NextPage = () => {
       <div className="w-full max-w-[360px]">
         <Formik onSubmit={onSubmit} initialValues={credentials.getDefault()}>
           {({ isValid, isSubmitting }: FormikProps<LoginFormValues>) => (
-            <Card component={Form} className="p-8 !bg-gray-800">
+            <Card component={Form} className="p-8 " light>
               <h1 className="text-lg mx-auto">Fakestagram</h1>
               <div className="flex flex-col space-y-2 my-4">
                 <InputField name="username" label="Username" />
@@ -65,7 +65,7 @@ const Login: NextPage = () => {
           )}
         </Formik>
 
-        <Card className="py-6 !bg-gray-800">
+        <Card className="py-6" light>
           <div className="text-center">
             {"Don't have an account?"}{" "}
             <Link href={"/register"}>

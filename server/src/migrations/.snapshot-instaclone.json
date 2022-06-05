@@ -127,6 +127,16 @@
           "primary": false,
           "nullable": false,
           "mappedType": "string"
+        },
+        "aspect_ratio": {
+          "name": "aspect_ratio",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "'16/9'",
+          "mappedType": "string"
         }
       },
       "name": "post",

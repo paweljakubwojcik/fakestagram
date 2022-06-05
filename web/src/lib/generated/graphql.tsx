@@ -25,7 +25,7 @@ export type Credentials = {
 export type Edge = {
   __typename?: 'Edge';
   cursor?: Maybe<Scalars['String']>;
-  node?: Maybe<Post>;
+  node: Post;
 };
 
 export type Image = {
@@ -95,6 +95,7 @@ export type MutationUpdatePostArgs = {
 
 export type Post = {
   __typename?: 'Post';
+  aspectRatio: Scalars['String'];
   createdAt: Scalars['DateTime'];
   creator: User;
   description: Scalars['String'];
@@ -108,8 +109,8 @@ export type Post = {
 
 export type PostConnection = {
   __typename?: 'PostConnection';
-  edges?: Maybe<Array<Edge>>;
-  pageInfo?: Maybe<PostPageInfo>;
+  edges: Array<Edge>;
+  pageInfo: PostPageInfo;
 };
 
 export type PostPageInfo = {
@@ -183,7 +184,7 @@ export type User = {
   username: Scalars['String'];
 };
 
-export type BasicPostFragmentFragment = { __typename?: 'Post', id: string, createdAt: any, updatedAt: any, description: string, images: Array<{ __typename?: 'Image', id: string, url: { __typename?: 'UrlSet', original: string } }>, creator: { __typename?: 'User', id: string, username: string } };
+export type BasicPostFragmentFragment = { __typename?: 'Post', id: string, createdAt: any, updatedAt: any, description: string, aspectRatio: string, likedByMe: boolean, likeCount: number, images: Array<{ __typename?: 'Image', id: string, url: { __typename?: 'UrlSet', original: string } }>, creator: { __typename?: 'User', id: string, username: string } };
 
 export type UserFragmentFragment = { __typename?: 'User', username: string, id: string };
 
@@ -193,7 +194,21 @@ export type CreatePostMutationVariables = Exact<{
 }>;
 
 
-export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'Post', id: string, createdAt: any, updatedAt: any, description: string, images: Array<{ __typename?: 'Image', id: string, url: { __typename?: 'UrlSet', original: string } }>, creator: { __typename?: 'User', id: string, username: string } } };
+export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'Post', id: string, createdAt: any, updatedAt: any, description: string, aspectRatio: string, likedByMe: boolean, likeCount: number, images: Array<{ __typename?: 'Image', id: string, url: { __typename?: 'UrlSet', original: string } }>, creator: { __typename?: 'User', id: string, username: string } } };
+
+export type DislikePostMutationVariables = Exact<{
+  post: Scalars['String'];
+}>;
+
+
+export type DislikePostMutation = { __typename?: 'Mutation', dislikePost: boolean };
+
+export type LikePostMutationVariables = Exact<{
+  post: Scalars['String'];
+}>;
+
+
+export type LikePostMutation = { __typename?: 'Mutation', likePost: boolean };
 
 export type LoginMutationVariables = Exact<{
   username: Scalars['String'];
@@ -237,7 +252,7 @@ export type PostsQueryVariables = Exact<{
 }>;
 
 
-export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PostConnection', edges?: Array<{ __typename?: 'Edge', cursor?: string | null, node?: { __typename?: 'Post', id: string, createdAt: any, updatedAt: any, description: string, images: Array<{ __typename?: 'Image', id: string, url: { __typename?: 'UrlSet', original: string } }>, creator: { __typename?: 'User', id: string, username: string } } | null }> | null, pageInfo?: { __typename?: 'PostPageInfo', startCursor?: string | null, endCursor?: string | null, hasPreviousPage: boolean, hasNextPage: boolean } | null } };
+export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PostConnection', edges: Array<{ __typename?: 'Edge', cursor?: string | null, node: { __typename?: 'Post', id: string, createdAt: any, updatedAt: any, description: string, aspectRatio: string, likedByMe: boolean, likeCount: number, images: Array<{ __typename?: 'Image', id: string, url: { __typename?: 'UrlSet', original: string } }>, creator: { __typename?: 'User', id: string, username: string } } }>, pageInfo: { __typename?: 'PostPageInfo', startCursor?: string | null, endCursor?: string | null, hasPreviousPage: boolean, hasNextPage: boolean } } };
 
 export type SignedUrlQueryVariables = Exact<{
   filename: Scalars['String'];
@@ -259,6 +274,9 @@ export const BasicPostFragmentFragmentDoc = gql`
   createdAt
   updatedAt
   description
+  aspectRatio
+  likedByMe
+  likeCount
   images {
     id
     url {
@@ -311,6 +329,68 @@ export function useCreatePostMutation(baseOptions?: Apollo.MutationHookOptions<C
 export type CreatePostMutationHookResult = ReturnType<typeof useCreatePostMutation>;
 export type CreatePostMutationResult = Apollo.MutationResult<CreatePostMutation>;
 export type CreatePostMutationOptions = Apollo.BaseMutationOptions<CreatePostMutation, CreatePostMutationVariables>;
+export const DislikePostDocument = gql`
+    mutation DislikePost($post: String!) {
+  dislikePost(post: $post)
+}
+    `;
+export type DislikePostMutationFn = Apollo.MutationFunction<DislikePostMutation, DislikePostMutationVariables>;
+
+/**
+ * __useDislikePostMutation__
+ *
+ * To run a mutation, you first call `useDislikePostMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDislikePostMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [dislikePostMutation, { data, loading, error }] = useDislikePostMutation({
+ *   variables: {
+ *      post: // value for 'post'
+ *   },
+ * });
+ */
+export function useDislikePostMutation(baseOptions?: Apollo.MutationHookOptions<DislikePostMutation, DislikePostMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DislikePostMutation, DislikePostMutationVariables>(DislikePostDocument, options);
+      }
+export type DislikePostMutationHookResult = ReturnType<typeof useDislikePostMutation>;
+export type DislikePostMutationResult = Apollo.MutationResult<DislikePostMutation>;
+export type DislikePostMutationOptions = Apollo.BaseMutationOptions<DislikePostMutation, DislikePostMutationVariables>;
+export const LikePostDocument = gql`
+    mutation LikePost($post: String!) {
+  likePost(post: $post)
+}
+    `;
+export type LikePostMutationFn = Apollo.MutationFunction<LikePostMutation, LikePostMutationVariables>;
+
+/**
+ * __useLikePostMutation__
+ *
+ * To run a mutation, you first call `useLikePostMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useLikePostMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [likePostMutation, { data, loading, error }] = useLikePostMutation({
+ *   variables: {
+ *      post: // value for 'post'
+ *   },
+ * });
+ */
+export function useLikePostMutation(baseOptions?: Apollo.MutationHookOptions<LikePostMutation, LikePostMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<LikePostMutation, LikePostMutationVariables>(LikePostDocument, options);
+      }
+export type LikePostMutationHookResult = ReturnType<typeof useLikePostMutation>;
+export type LikePostMutationResult = Apollo.MutationResult<LikePostMutation>;
+export type LikePostMutationOptions = Apollo.BaseMutationOptions<LikePostMutation, LikePostMutationVariables>;
 export const LoginDocument = gql`
     mutation Login($username: String!, $password: String!) {
   login(credentials: {username: $username, password: $password}) {

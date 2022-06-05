@@ -3,6 +3,9 @@ fragment BasicPostFragment on Post {
   createdAt
   updatedAt
   description
+  aspectRatio
+  likedByMe
+  likeCount
   images {
     id
     url {

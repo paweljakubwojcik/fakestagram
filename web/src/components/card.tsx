@@ -3,13 +3,23 @@ import { ComponentPropsWithRef, ComponentType, createElement, ElementType, FC, F
 
 type CardProps<T extends ElementType = ElementType> = ComponentPropsWithRef<T> & {
   component?: T | ComponentType
+  light?: boolean
 }
 
 export const Card: FC<CardProps> = forwardRef(
-  ({ className, children, component = "div", ...props }, ref: ForwardedRef<ElementType>) => {
+  ({ className, children, component = "div", light, ...props }, ref: ForwardedRef<ElementType>) => {
     return createElement<CardProps>(
       component,
-      { className: classnames("bg-white dark:bg-black flex flex-col border rounded-sm m-3 dark:!border-gray-300/20", className), ref, ...props },
+      {
+        className: classnames(
+          "bg-white  flex flex-col border rounded-sm m-3 dark:!border-gray-300/20",
+          light && "dark:bg-gray-800",
+          !light && "dark:bg-black",
+          className
+        ),
+        ref,
+        ...props,
+      },
       children
     )
   }

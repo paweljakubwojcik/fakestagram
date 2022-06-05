@@ -2,9 +2,9 @@ import classnames from "classnames"
 import { useAuth } from "hooks/use-auth"
 import Image from "next/image"
 import Link from "next/link"
-import sloth from "public/sloth.jpg"
 import { ComponentPropsWithoutRef, FC, memo, useState } from "react"
 import { Heart, Home, PlusSquare, Send } from "react-feather"
+import { Avatar } from "./avatar"
 import { Button } from "./buttons/button"
 import { IconButton } from "./buttons/icon-button"
 import { Card } from "./card"
@@ -31,7 +31,7 @@ export const Navbar: FC<NavbarProps> = memo(({ className }) => {
   return (
     <>
       <CreatePostView open={creatingPost} onClose={() => setCreatingPost(false)} />
-      <Card component="header" className={classnames("flex m-0 py-0 px-4  w-full", className)}>
+      <Card component="header" className={classnames("flex m-0 py-0 px-4 w-full sticky top-0 z-10", className)}>
         <div className="flex py-3 flex-nowrap w-full max-w-main-content mx-auto">
           <h1 className="text-lg font-bold mr-auto block">
             <Link href={"/"}>
@@ -73,13 +73,7 @@ export const Navbar: FC<NavbarProps> = memo(({ className }) => {
                     </div>
                   }
                 >
-                  <Image
-                    src={sloth}
-                    alt={`${me?.username} profile image`}
-                    width={24}
-                    height={24}
-                    className="rounded-full"
-                  />
+                  <Avatar user={me} />
                 </PopoverMenu>
               </>
             )}

@@ -28,6 +28,10 @@ export class Post extends BaseEntity {
   @OneToMany(() => Image, "post")
   readonly images: Collection<Image, this>
 
+  @Field(() => String)
+  @Property({ default: "16/9" })
+  readonly aspectRatio: string = "16/9"
+
   constructor(images: string[]) {
     super()
     this.images = new Collection(
