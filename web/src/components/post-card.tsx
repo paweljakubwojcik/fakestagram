@@ -1,4 +1,4 @@
-import { BasicPostFragmentFragment, useDislikePostMutation, useLikePostMutation } from "@graphql"
+import { BasicPostFragmentFragment, LikesFragmentDoc, useLikeOrDislikePostMutation } from "@graphql"
 import classnames from "classnames"
 import { formatDistanceToNow } from "date-fns"
 import Image from "next/image"
@@ -13,10 +13,31 @@ type PostCardProps = ComponentPropsWithoutRef<"div"> & {
 }
 
 export const PostCard: FC<PostCardProps> = ({ className, post }) => {
-  const { description, images, aspectRatio, creator, createdAt, likedByMe, id } = post
+  const { description, images, aspectRatio, creator, createdAt, likedByMe, id, likeCount } = post
 
-  const [like] = useLikePostMutation({ variables: { post: id } })
-  const [dislike] = useDislikePostMutation({ variables: { post: id } })
+  const [likeOrDislike, { loading, error }] = useLikeOrDislikePostMutation({
+    variables: {
+      like: !likedByMe,
+      post: id,
+    },
+    update: (cache, { data, errors }) => {
+      cache.updateFragment(
+        {
+          id,
+          fragment: LikesFragmentDoc,
+        },
+        (prev) => ({ ...prev, ...data?.likeOrDislikePost })
+      )
+    },
+    optimisticResponse: ({ like, post }) => ({
+      likeOrDislikePost: {
+        id: post,
+        likedByMe: like,
+        likeCount: like ? likeCount + 1 : likeCount - 1,
+        __typename: "Post",
+      },
+    }),
+  })
 
   return (
     <Card className={classnames("flex-col flex text-base", className)}>
@@ -32,7 +53,14 @@ export const PostCard: FC<PostCardProps> = ({ className, post }) => {
       </div>
       <div className="px-4 py-2 space-y-2">
         <div className="flex py-3 child:mr-2">
-          <IconButton active={likedByMe} onClick={() => (likedByMe ? dislike() : like())}>
+          <IconButton
+            active={likedByMe}
+            onClick={async () => {
+              try {
+                likeOrDislike()
+              } catch (e) {}
+            }}
+          >
             <Heart />
           </IconButton>
           <IconButton>

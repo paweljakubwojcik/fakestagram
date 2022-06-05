@@ -31,6 +31,9 @@ class AddPostInput {
 
   @Field(() => [String])
   images: string[]
+
+  @Field(() => String)
+  aspectRatio: string
 }
 @ArgsType()
 class UpdatePostInput implements Partial<Post> {
@@ -61,9 +64,7 @@ export class PostResolver {
     @Ctx() { em }: MyContext,
     @RelayArgs(PostSort) paginationArgs: RelayPaginationArgs<PostSort>
   ): Promise<RelayResponse<Post>> {
-    const Query = em
-      .qb(Post)
-      .select(["*"])
+    const Query = em.qb(Post).select(["*"])
     return getRelayResult(Query, paginationArgs)
   }
 
@@ -107,17 +108,29 @@ export class PostResolver {
     return true
   }
 
-  // TODO: maybe merge those two into one ?
-  @Mutation(() => Boolean)
+  @Mutation(() => Post)
   @UseMiddleware(isAuth)
-  async likePost(@Arg("post") id: string, @Ctx() { em, req }: MyContext) {
+  async likeOrDislikePost(
+    @Arg("post") id: string,
+    @Arg("like") like: boolean,
+    @Ctx() { em, req }: MyContext
+  ) {
     try {
-      await em.persistAndFlush(
-        em.create(Like, {
+      console.log(like)
+      if (like) {
+        await em.persistAndFlush(
+          em.create(Like, {
+            post: em.getReference(Post, id),
+            user: em.getReference(User, req.session.userId!),
+          })
+        )
+      } else {
+        const like = await em.findOneOrFail(Like, {
           post: em.getReference(Post, id),
           user: em.getReference(User, req.session.userId!),
         })
-      )
+        em.removeAndFlush(like)
+      }
     } catch (e) {
       if (e.name === "UniqueConstraintViolationException") {
         throw new ApolloError("Post is already liked")
@@ -125,27 +138,13 @@ export class PostResolver {
       if (e.name === "ForeignKeyConstraintViolationException") {
         throw new UserInputError("Post does not exist or have been deleted")
       }
-      throw e
-    }
-    return true
-  }
-
-  @Mutation(() => Boolean)
-  @UseMiddleware(isAuth)
-  async dislikePost(@Arg("post") id: string, @Ctx() { em, req }: MyContext) {
-    try {
-      const like = await em.findOneOrFail(Like, {
-        post: em.getReference(Post, id),
-        user: em.getReference(User, req.session.userId!),
-      })
-      em.removeAndFlush(like)
-    } catch (e) {
       if (e.name === "NotFoundError") {
         throw new ApolloError("Post doesn't exist or is not liked by you")
       }
       throw e
+    } finally {
+      return em.findOne(Post, { id })
     }
-    return true
   }
 
   @FieldResolver()

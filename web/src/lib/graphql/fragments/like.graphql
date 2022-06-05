@@ -1,0 +1,5 @@
+fragment Likes on Post {
+  id
+  likedByMe
+  likeCount
+}

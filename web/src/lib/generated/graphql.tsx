@@ -48,8 +48,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   createPost: Post;
   deletePost: Scalars['Boolean'];
-  dislikePost: Scalars['Boolean'];
-  likePost: Scalars['Boolean'];
+  likeOrDislikePost: Post;
   login: User;
   logout: Scalars['Boolean'];
   register: User;
@@ -58,6 +57,7 @@ export type Mutation = {
 
 
 export type MutationCreatePostArgs = {
+  aspectRatio: Scalars['String'];
   description: Scalars['String'];
   images: Array<Scalars['String']>;
 };
@@ -68,12 +68,8 @@ export type MutationDeletePostArgs = {
 };
 
 
-export type MutationDislikePostArgs = {
-  post: Scalars['String'];
-};
-
-
-export type MutationLikePostArgs = {
+export type MutationLikeOrDislikePostArgs = {
+  like: Scalars['Boolean'];
   post: Scalars['String'];
 };
 
@@ -154,6 +150,7 @@ export type QueryPostsArgs = {
   before?: InputMaybe<Scalars['ID']>;
   first?: InputMaybe<Scalars['Int']>;
   last?: InputMaybe<Scalars['Int']>;
+  order?: InputMaybe<SortDir>;
   sort?: InputMaybe<PostSort>;
 };
 
@@ -166,6 +163,12 @@ export type QuerySignedUrlArgs = {
 export type QuerySignedUrlsArgs = {
   filenames: Array<Scalars['String']>;
 };
+
+/** Order of sorting */
+export enum SortDir {
+  Asc = 'ASC',
+  Desc = 'DESC'
+}
 
 export type UrlSet = {
   __typename?: 'UrlSet';
@@ -184,6 +187,8 @@ export type User = {
   username: Scalars['String'];
 };
 
+export type LikesFragment = { __typename?: 'Post', id: string, likedByMe: boolean, likeCount: number };
+
 export type BasicPostFragmentFragment = { __typename?: 'Post', id: string, createdAt: any, updatedAt: any, description: string, aspectRatio: string, likedByMe: boolean, likeCount: number, images: Array<{ __typename?: 'Image', id: string, url: { __typename?: 'UrlSet', original: string } }>, creator: { __typename?: 'User', id: string, username: string } };
 
 export type UserFragmentFragment = { __typename?: 'User', username: string, id: string };
@@ -191,24 +196,19 @@ export type UserFragmentFragment = { __typename?: 'User', username: string, id: 
 export type CreatePostMutationVariables = Exact<{
   description: Scalars['String'];
   images: Array<Scalars['String']> | Scalars['String'];
+  aspectRatio: Scalars['String'];
 }>;
 
 
 export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'Post', id: string, createdAt: any, updatedAt: any, description: string, aspectRatio: string, likedByMe: boolean, likeCount: number, images: Array<{ __typename?: 'Image', id: string, url: { __typename?: 'UrlSet', original: string } }>, creator: { __typename?: 'User', id: string, username: string } } };
 
-export type DislikePostMutationVariables = Exact<{
+export type LikeOrDislikePostMutationVariables = Exact<{
   post: Scalars['String'];
+  like: Scalars['Boolean'];
 }>;
 
 
-export type DislikePostMutation = { __typename?: 'Mutation', dislikePost: boolean };
-
-export type LikePostMutationVariables = Exact<{
-  post: Scalars['String'];
-}>;
-
-
-export type LikePostMutation = { __typename?: 'Mutation', likePost: boolean };
+export type LikeOrDislikePostMutation = { __typename?: 'Mutation', likeOrDislikePost: { __typename?: 'Post', id: string, likedByMe: boolean, likeCount: number } };
 
 export type LoginMutationVariables = Exact<{
   username: Scalars['String'];
@@ -249,6 +249,7 @@ export type PostsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']>;
   after?: InputMaybe<Scalars['ID']>;
   sort?: InputMaybe<PostSort>;
+  order?: InputMaybe<SortDir>;
 }>;
 
 
@@ -268,6 +269,13 @@ export type SignedUrlsQueryVariables = Exact<{
 
 export type SignedUrlsQuery = { __typename?: 'Query', signedUrls: Array<string> };
 
+export const LikesFragmentDoc = gql`
+    fragment Likes on Post {
+  id
+  likedByMe
+  likeCount
+}
+    `;
 export const BasicPostFragmentFragmentDoc = gql`
     fragment BasicPostFragment on Post {
   id
@@ -296,8 +304,12 @@ export const UserFragmentFragmentDoc = gql`
 }
     `;
 export const CreatePostDocument = gql`
-    mutation CreatePost($description: String!, $images: [String!]!) {
-  createPost(description: $description, images: $images) {
+    mutation CreatePost($description: String!, $images: [String!]!, $aspectRatio: String!) {
+  createPost(
+    description: $description
+    images: $images
+    aspectRatio: $aspectRatio
+  ) {
     ...BasicPostFragment
   }
 }
@@ -319,6 +331,7 @@ export type CreatePostMutationFn = Apollo.MutationFunction<CreatePostMutation, C
  *   variables: {
  *      description: // value for 'description'
  *      images: // value for 'images'
+ *      aspectRatio: // value for 'aspectRatio'
  *   },
  * });
  */
@@ -329,68 +342,40 @@ export function useCreatePostMutation(baseOptions?: Apollo.MutationHookOptions<C
 export type CreatePostMutationHookResult = ReturnType<typeof useCreatePostMutation>;
 export type CreatePostMutationResult = Apollo.MutationResult<CreatePostMutation>;
 export type CreatePostMutationOptions = Apollo.BaseMutationOptions<CreatePostMutation, CreatePostMutationVariables>;
-export const DislikePostDocument = gql`
-    mutation DislikePost($post: String!) {
-  dislikePost(post: $post)
+export const LikeOrDislikePostDocument = gql`
+    mutation LikeOrDislikePost($post: String!, $like: Boolean!) {
+  likeOrDislikePost(post: $post, like: $like) {
+    ...Likes
+  }
 }
-    `;
-export type DislikePostMutationFn = Apollo.MutationFunction<DislikePostMutation, DislikePostMutationVariables>;
+    ${LikesFragmentDoc}`;
+export type LikeOrDislikePostMutationFn = Apollo.MutationFunction<LikeOrDislikePostMutation, LikeOrDislikePostMutationVariables>;
 
 /**
- * __useDislikePostMutation__
+ * __useLikeOrDislikePostMutation__
  *
- * To run a mutation, you first call `useDislikePostMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useDislikePostMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useLikeOrDislikePostMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useLikeOrDislikePostMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [dislikePostMutation, { data, loading, error }] = useDislikePostMutation({
+ * const [likeOrDislikePostMutation, { data, loading, error }] = useLikeOrDislikePostMutation({
  *   variables: {
  *      post: // value for 'post'
+ *      like: // value for 'like'
  *   },
  * });
  */
-export function useDislikePostMutation(baseOptions?: Apollo.MutationHookOptions<DislikePostMutation, DislikePostMutationVariables>) {
+export function useLikeOrDislikePostMutation(baseOptions?: Apollo.MutationHookOptions<LikeOrDislikePostMutation, LikeOrDislikePostMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<DislikePostMutation, DislikePostMutationVariables>(DislikePostDocument, options);
+        return Apollo.useMutation<LikeOrDislikePostMutation, LikeOrDislikePostMutationVariables>(LikeOrDislikePostDocument, options);
       }
-export type DislikePostMutationHookResult = ReturnType<typeof useDislikePostMutation>;
-export type DislikePostMutationResult = Apollo.MutationResult<DislikePostMutation>;
-export type DislikePostMutationOptions = Apollo.BaseMutationOptions<DislikePostMutation, DislikePostMutationVariables>;
-export const LikePostDocument = gql`
-    mutation LikePost($post: String!) {
-  likePost(post: $post)
-}
-    `;
-export type LikePostMutationFn = Apollo.MutationFunction<LikePostMutation, LikePostMutationVariables>;
-
-/**
- * __useLikePostMutation__
- *
- * To run a mutation, you first call `useLikePostMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useLikePostMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [likePostMutation, { data, loading, error }] = useLikePostMutation({
- *   variables: {
- *      post: // value for 'post'
- *   },
- * });
- */
-export function useLikePostMutation(baseOptions?: Apollo.MutationHookOptions<LikePostMutation, LikePostMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<LikePostMutation, LikePostMutationVariables>(LikePostDocument, options);
-      }
-export type LikePostMutationHookResult = ReturnType<typeof useLikePostMutation>;
-export type LikePostMutationResult = Apollo.MutationResult<LikePostMutation>;
-export type LikePostMutationOptions = Apollo.BaseMutationOptions<LikePostMutation, LikePostMutationVariables>;
+export type LikeOrDislikePostMutationHookResult = ReturnType<typeof useLikeOrDislikePostMutation>;
+export type LikeOrDislikePostMutationResult = Apollo.MutationResult<LikeOrDislikePostMutation>;
+export type LikeOrDislikePostMutationOptions = Apollo.BaseMutationOptions<LikeOrDislikePostMutation, LikeOrDislikePostMutationVariables>;
 export const LoginDocument = gql`
     mutation Login($username: String!, $password: String!) {
   login(credentials: {username: $username, password: $password}) {
@@ -557,8 +542,15 @@ export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
 export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
 export const PostsDocument = gql`
-    query Posts($last: Int, $before: ID, $first: Int, $after: ID, $sort: PostSort) {
-  posts(last: $last, before: $before, first: $first, after: $after, sort: $sort) {
+    query Posts($last: Int, $before: ID, $first: Int, $after: ID, $sort: PostSort, $order: SortDir) {
+  posts(
+    last: $last
+    before: $before
+    first: $first
+    after: $after
+    sort: $sort
+    order: $order
+  ) {
     edges {
       cursor
       node {
@@ -592,6 +584,7 @@ export const PostsDocument = gql`
  *      first: // value for 'first'
  *      after: // value for 'after'
  *      sort: // value for 'sort'
+ *      order: // value for 'order'
  *   },
  * });
  */

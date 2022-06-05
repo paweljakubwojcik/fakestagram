@@ -1,5 +1,5 @@
-mutation CreatePost($description: String! , $images: [String!]!) {
-	createPost(description: $description, images: $images) {
-		...BasicPostFragment
-	}
+mutation CreatePost($description: String!, $images: [String!]!, $aspectRatio: String!) {
+  createPost(description: $description, images: $images, aspectRatio: $aspectRatio) {
+    ...BasicPostFragment
+  }
 }

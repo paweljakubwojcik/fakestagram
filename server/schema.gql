@@ -33,10 +33,9 @@ type Like {
 }
 
 type Mutation {
-  createPost(description: String!, images: [String!]!): Post!
+  createPost(aspectRatio: String!, description: String!, images: [String!]!): Post!
   deletePost(id: String!): Boolean!
-  dislikePost(post: String!): Boolean!
-  likePost(post: String!): Boolean!
+  likeOrDislikePost(like: Boolean!, post: String!): Post!
   login(credentials: Credentials!): User!
   logout: Boolean!
   register(credentials: Credentials!): User!
@@ -79,9 +78,15 @@ type Query {
   isUsernameAvailable(username: String!): Boolean!
   me: User
   post(id: ID!): Post
-  posts(after: ID, before: ID, first: Int, last: Int, sort: PostSort = createdAt): PostConnection!
+  posts(after: ID, before: ID, first: Int, last: Int, order: SortDir = ASC, sort: PostSort = createdAt): PostConnection!
   signedUrl(filename: String!): String!
   signedUrls(filenames: [String!]!): [String!]!
+}
+
+"""Order of sorting"""
+enum SortDir {
+  ASC
+  DESC
 }
 
 type UrlSet {

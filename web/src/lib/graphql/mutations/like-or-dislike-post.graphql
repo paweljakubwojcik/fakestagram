@@ -1,0 +1,5 @@
+mutation LikeOrDislikePost($post: String!, $like: Boolean!) {
+  likeOrDislikePost(post: $post, like: $like) {
+    ...Likes
+  }
+}

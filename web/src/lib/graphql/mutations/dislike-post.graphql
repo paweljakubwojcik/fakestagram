@@ -1,3 +1,0 @@
-mutation DislikePost($post: String!) {
-	dislikePost(post: $post)
-}
