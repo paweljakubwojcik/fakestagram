@@ -23,10 +23,10 @@ export const getRelayResult = async <
 
   const { cursor, relation } = (() => {
     if (after) {
-      return { cursor: after, relation: "$gte" }
+      return { cursor: after, relation: sortOrder === SortDir.ASC ? "$gte" : "$lte" }
     }
     if (before) {
-      return { cursor: before, relation: "$lte" }
+      return { cursor: before, relation: sortOrder === SortDir.ASC ? "$lte" : "$gte" }
     }
     return { cursor: "", relation: "" }
   })()

@@ -47,7 +47,8 @@ const method = "PUT"
 
 export async function configureBucketCors() {
   const [metadata] = await storage.bucket(BUCKET_NAME).getMetadata()
-  if (!equals(metadata.cors.origin, origin)) {
+  const configuredCorsOrigin = metadata.cors[0].origin 
+  if (!equals(configuredCorsOrigin, origin)) {
     await storage.bucket(BUCKET_NAME).setCorsConfiguration([
       {
         maxAgeSeconds,
