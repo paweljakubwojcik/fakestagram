@@ -40,19 +40,6 @@
     background: linear-gradient(#6559ca, #bc318f 30%, #e33f5f 50%, #f77638 70%, #fec66d 100%);
   }
 
-  .instagradient-stroke {
-    stroke: url(#insta-gradient-1);
-  }
-
-  .instagradient-fill {
-    fill: url(#insta-gradient-1);
-  }
-
-  .instagradient {
-    fill: url(#insta-gradient-1) !important;
-    stroke: url(#insta-gradient-1);
-  }
-
   @keyframes appear {
     from {
       opacity: 0;

@@ -11,7 +11,7 @@ export const IconButton: FC<IconButtonProps> = forwardRef<any, IconButtonProps>(
     return (
       <ButtonBase className={classnames("group", className)} {...props} ref={ref}>
         <div className="relative">
-          <span className={classnames("child:instagradient-stroke", active && "child:instagradient-fill")}>{children}</span>
+          <span className={classnames("child:stroke-instagradient", active && "child:fill-instagradient")}>{children}</span>
           <span
             className={classnames(
               active && "opacity-0",

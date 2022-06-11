@@ -116,7 +116,6 @@ export class PostResolver {
     @Ctx() { em, req }: MyContext
   ) {
     try {
-      console.log(like)
       if (like) {
         await em.persistAndFlush(
           em.create(Like, {
@@ -159,7 +158,9 @@ export class PostResolver {
 
   @FieldResolver(() => [Like])
   async likes(@Root() post: Post, @Ctx() { em }: MyContext) {
+    console.log(post)
     await em.populate(post, ["likes.user"])
+    console.log(post)
     return post.likes
   }
 

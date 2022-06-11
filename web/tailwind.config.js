@@ -8,6 +8,8 @@ module.exports = {
       colors: {
         primary: colors.fuchsia["600"],
         "primary-light": colors.fuchsia["400"],
+        "instagradient": "url(#insta-gradient-1)",
+        "linear-instagradient": "linear-gradient(#6559ca, #bc318f 30%, #e33f5f 50%, #f77638 70%, #fec66d 100%);"
       },
       maxWidth: {
         "main-content": "975px",
