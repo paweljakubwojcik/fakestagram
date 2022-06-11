@@ -19,8 +19,8 @@ export const ImageCrop: FC<ImageCropProps> = ({ className, innerRef }) => {
 
   const currentImage = useAppSelector(postFormSelectors.getCurrentImage)
   const imageKey = useAppSelector((state) => state.postForm.currentImage)
+  const aspectRatio = useAppSelector((state) => state.postForm.aspectRatio)
 
-  const aspectRatio = currentImage.aspectRatio
 
   const [isGrabbing, setIsGrabbing] = useState(false)
 

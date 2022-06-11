@@ -32,7 +32,7 @@ export const Controls: FC<ControlsProps> = ({ className, applyTranslate }) => {
   const { setCrop, remove, setAspectRatio, setCurrentImage } = postFormActions
   const currentImage = useAppSelector(postFormSelectors.getCurrentImage)
   const images = useAppSelector(postFormSelectors.getImages)
-  const aspectRatio = currentImage.aspectRatio
+  const aspectRatio = useAppSelector((state) => state.postForm.aspectRatio)
 
   const [openControl, setOpenControl] = useState<string>()
 
