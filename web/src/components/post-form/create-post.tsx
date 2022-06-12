@@ -1,18 +1,14 @@
-import { useCreatePostMutation, useSignedUrlsLazyQuery } from "@graphql"
-import classnames from "classnames"
-import { Button, IconButton } from "components/buttons"
 import { FileUpload } from "components/file-upload"
 import { Modal } from "components/modal"
+import { MultiStepForm, MultiStepFormProps } from "components/multistep-form"
+import { useCreatePost } from "hooks/use-create-post"
 import { useAppDispatch, useAppSelector } from "lib/redux/hooks"
 import { postFormActions, postFormThunks } from "lib/redux/reducers/create-post"
 import Head from "next/head"
 import { isEmpty } from "ramda"
-import { ComponentProps, ComponentPropsWithoutRef, FC, useEffect, useReducer, useState } from "react"
-import { ArrowLeft } from "react-feather"
+import { ComponentProps, ComponentPropsWithoutRef, FC, useEffect, useReducer } from "react"
 import { ImageCrop } from "./image-crop/image-crop"
-import { cropImage } from "./image-crop/utils"
-import { PostMetaForm } from "./post-meta-form"
-import { useCreatePost } from "hooks/use-create-post"
+import { PostMetaForm, PostMetaFormPanel } from "./post-meta-form"
 
 type CreatePostProps = ComponentPropsWithoutRef<"div"> & ComponentProps<typeof Modal>
 
@@ -34,7 +30,7 @@ const stepsReducer = (state: STEP, action: StepAction) => {
   }
 }
 
-export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, ...props }) => {
+export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, open, ...props }) => {
   const { setCroppedUrl, clear } = postFormActions
   const { images, aspectRatio, description } = useAppSelector((state) => state.postForm)
   const dispatch = useAppDispatch()
@@ -56,18 +52,16 @@ export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, ...pro
     }
   }, [images])
 
-  const uploading = step === "UPLOADING"
-  const cropping = step === "CROPPING"
-  const meta = step === "META"
-
   const [createPost] = useCreatePost()
 
-  const headers: Record<STEP, { title: string; backAction?: () => void; nextAction?: () => void }> = {
+  const steps: MultiStepFormProps["steps"] = {
     UPLOADING: {
       title: "Create new post",
+      content: <FileUpload onChange={handleAddFiles} />,
     },
     CROPPING: {
       title: "Crop images",
+      content: <ImageCrop className="animate-opacity duration-500" />,
       backAction: () => {
         Modal.open({
           onAccept: () => dispatch(clear()),
@@ -76,62 +70,48 @@ export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, ...pro
         })
       },
       nextAction: async () => {
-        Object.entries(images).forEach(async ([id, image]) =>
-          dispatch(setCroppedUrl({ url: await cropImage(image), id }))
-        )
+        await dispatch(postFormThunks.cropImages())
         stepDispatch({ type: "SET", step: "META" })
       },
     },
     META: {
       title: "Say something about your photo",
+      content: <PostMetaForm className="animate-opacity" />,
+      rightPanelContent: <PostMetaFormPanel />,
       nextAction: () => {
         createPost({ images, aspectRatio, description })
       },
-      backAction: () => stepDispatch({ type: "PREV" }),
+      backAction: () => {
+        dispatch(postFormActions.clearCroppedImages())
+        stepDispatch({ type: "PREV" })
+      },
     },
   }
 
-  const { title, backAction, nextAction } = headers[step]
-
   return (
-    <Modal
-      {...props}
-      title={
-        <>
-          <div className="flex justify-between items-center">
-            <IconButton onClick={backAction} className={classnames(!backAction && "invisible")}>
-              <ArrowLeft />
-            </IconButton>
-            <div>{title}</div>
-            <Button onClick={nextAction} className={classnames("py-1", !nextAction && "invisible")}>
-              Next
-            </Button>
-          </div>
-        </>
-      }
-      className="w-full max-w-3xl min-h-fit max-h-full m-10 overflow-hidden"
-      onClose={() => {
-        if (isEmpty(images)) {
-          handleClose()
-        } else {
-          Modal.open({
-            onAccept: handleClose,
-            title: "Abort creating new post ?",
-            info: "If you close this dialog your changes will be lost.",
-          })
-        }
-      }}
-    >
-      <Head>
-        <title>Create new post | Fakestagram</title>
-      </Head>
-      {uploading && (
-        <div className="p-4 w-full h-full aspect-square">
-          <FileUpload onChange={handleAddFiles} />
-        </div>
+    <>
+      {open && (
+        <Head>
+          <title>Create new post | Fakestagram</title>
+        </Head>
       )}
-      {cropping && <ImageCrop className="animate-opacity duration-500" />}
-      {meta && <PostMetaForm className="animate-opacity" />}
-    </Modal>
+      <MultiStepForm
+        open={open}
+        steps={steps}
+        currentStep={step}
+        onClose={() => {
+          if (isEmpty(images)) {
+            handleClose()
+          } else {
+            Modal.open({
+              onAccept: handleClose,
+              title: "Abort creating new post ?",
+              info: "If you close this dialog your changes will be lost.",
+            })
+          }
+        }}
+        {...props}
+      />
+    </>
   )
 }

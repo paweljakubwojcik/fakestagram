@@ -46,7 +46,7 @@ export const Controls: FC<ControlsProps> = ({ className, applyTranslate }) => {
       >
         <div className="">
           {[
-            { ...currentImage.originalAspectRatio, label: "original" },
+            { x: currentImage.originalSize.width, y: currentImage.originalSize.height, label: "original" },
             ...ASPECTS_RATIOS.map(({ x, y }) => ({ x, y, label: `${x}:${y}` })),
           ].map(({ x, y, label }) => (
             <Button
@@ -104,7 +104,7 @@ export const Controls: FC<ControlsProps> = ({ className, applyTranslate }) => {
                 <div
                   className="block w-24 h-24 bg-cover bg-no-repeat bg-center"
                   style={{
-                    backgroundImage: `url(${image.base64url})`,
+                    backgroundImage: `url(${image.originalUrl})`,
                   }}
                 ></div>
               </ButtonBase>

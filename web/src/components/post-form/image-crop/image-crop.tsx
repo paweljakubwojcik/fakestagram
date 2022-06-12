@@ -1,7 +1,7 @@
 import classnames from "classnames"
 import { useAppDispatch, useAppSelector } from "lib/redux/hooks"
 import { CropData, postFormActions, postFormSelectors } from "lib/redux/reducers/create-post"
-import { ComponentPropsWithoutRef, FC, ForwardedRef, MouseEvent, useEffect, useRef, useState } from "react"
+import { ComponentPropsWithoutRef, FC, ForwardedRef, MouseEvent, useEffect, useMemo, useRef, useState } from "react"
 import { flushSync } from "react-dom"
 import { Point } from "types"
 import useResizeObserver from "use-resize-observer"
@@ -21,7 +21,6 @@ export const ImageCrop: FC<ImageCropProps> = ({ className, innerRef }) => {
   const imageKey = useAppSelector((state) => state.postForm.currentImage)
   const aspectRatio = useAppSelector((state) => state.postForm.aspectRatio)
 
-
   const [isGrabbing, setIsGrabbing] = useState(false)
 
   const picRef = useRef<HTMLDivElement>(null)
@@ -32,38 +31,41 @@ export const ImageCrop: FC<ImageCropProps> = ({ className, innerRef }) => {
   const picPrevTranslate = useRef<CropData>(currentImage.crop)
   const { ref: containerRef, width = 1, height = 1 } = useResizeObserver<HTMLDivElement>()
 
-  const imageSizeOnScreen = getWidthAndHeight({
-    aspectRatio,
-    originalAspectRatio: currentImage.originalAspectRatio,
-    width,
-    height,
-  })
+  const imageSizeOnScreen = useMemo(
+    () =>
+      getWidthAndHeight({
+        aspectRatio,
+        originalSize: currentImage.originalSize,
+        width,
+        height,
+      }),
+    [width, height, aspectRatio, currentImage.originalSize]
+  )
 
   const applyTranslate = (newTranslateObj: Partial<CropData>) => {
     if (picRef.current) {
       const screenSizeCropData = {
-        x: (currentImage.crop.x * imageSizeOnScreen.width) / currentImage.originalAspectRatio.x,
-        y: (currentImage.crop.y * imageSizeOnScreen.height) / currentImage.originalAspectRatio.y,
+        x: (currentImage.crop.x * imageSizeOnScreen.width) / currentImage.originalSize.width,
+        y: (currentImage.crop.y * imageSizeOnScreen.height) / currentImage.originalSize.height,
         scale: currentImage.crop.scale,
       }
+
       const newTranslate = { ...screenSizeCropData, ...newTranslateObj }
       const { x, y, scale } = newTranslate
       localTranslate.current = newTranslate
       picRef.current.style.transform = `translate3d(${x}px, ${y}px, 0px) scale(${scale})`
+
+      return newTranslate
     }
   }
   useEffect(() => {
     // synchronizing with new pic
-    const screenSizeCropData = {
-      x: (currentImage.crop.x * imageSizeOnScreen.width) / currentImage.originalAspectRatio.x,
-      y: (currentImage.crop.y * imageSizeOnScreen.height) / currentImage.originalAspectRatio.y,
-      scale: currentImage.crop.scale,
+    const newTranslate = applyTranslate({})
+    if (newTranslate) {
+      picPrevTranslate.current = newTranslate
     }
-    picPrevTranslate.current = screenSizeCropData
-    localTranslate.current = screenSizeCropData
-    applyTranslate({})
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [imageKey])
+  }, [imageKey, imageSizeOnScreen.height, imageSizeOnScreen.width])
 
   const beginMove = (e: MouseEvent) => {
     setIsGrabbing(true)
@@ -107,8 +109,8 @@ export const ImageCrop: FC<ImageCropProps> = ({ className, innerRef }) => {
     applyTranslate(newCropData)
     picPrevTranslate.current = localTranslate.current
     const realSizeCropData = {
-      x: (newCropData.x * currentImage.originalAspectRatio.x) / imageSizeOnScreen.width,
-      y: (newCropData.y * currentImage.originalAspectRatio.y) / imageSizeOnScreen.height,
+      x: (newCropData.x * currentImage.originalSize.width) / imageSizeOnScreen.width,
+      y: (newCropData.y * currentImage.originalSize.height) / imageSizeOnScreen.height,
     }
     dispatch(setCrop({ crop: realSizeCropData }))
   }
@@ -117,7 +119,7 @@ export const ImageCrop: FC<ImageCropProps> = ({ className, innerRef }) => {
     <div
       id="container"
       ref={mergeRefs(containerRef, innerRef)}
-      className={classnames("flex h-full aspect-square justify-center items-center relative", className)}
+      className={classnames("flex h-full w-full justify-center items-center relative", className)}
     >
       <div
         ref={viewportRef}
@@ -136,7 +138,7 @@ export const ImageCrop: FC<ImageCropProps> = ({ className, innerRef }) => {
           id="image"
           ref={picRef}
           style={{
-            backgroundImage: `url(${currentImage.base64url})`,
+            backgroundImage: `url(${currentImage.originalUrl})`,
             ...imageSizeOnScreen,
           }}
           className={classnames(
@@ -151,7 +153,7 @@ export const ImageCrop: FC<ImageCropProps> = ({ className, innerRef }) => {
         />
         <div
           className={classnames(
-            "absolute w-full h-full block pointer-events-none child:opacity-30 border child:shadow-camera transition-opacity top-0 left-0",
+            "absolute w-[calc(100%-2px)] h-full block pointer-events-none child:opacity-30 border inset-0 child:shadow-camera transition-opacity top-0 left-0 box-border",
             isGrabbing && "opacity-1",
             !isGrabbing && "opacity-0"
           )}

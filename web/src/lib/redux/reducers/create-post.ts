@@ -1,11 +1,15 @@
 import { createSlice, Dispatch, PayloadAction, ThunkAction } from "@reduxjs/toolkit"
 import { Point } from "types"
-import { getImageAspectRatio } from "utils/get-image-aspect-ratio"
+import { getImageSize } from "utils/get-image-aspect-ratio"
 import { toBase64 } from "utils/to-base-64"
 import { RootState } from "../store"
 import { v4 as uuid } from "uuid"
+import { cropImage } from "components/post-form/image-crop/utils"
+import { asyncForEach } from "utils/async-for-each"
 
 export type AspectRatio = Point
+
+export type Size = { width: number; height: number }
 
 export type CropData = {
   x: number
@@ -14,10 +18,9 @@ export type CropData = {
 }
 
 export type EditableImage = {
-  base64url: string
+  originalUrl: string
+  originalSize: Size
   crop: CropData
-  originalAspectRatio: AspectRatio
-  originalSize?: Point
   croppedUrl?: string
 }
 
@@ -29,19 +32,20 @@ export type PostFormSlice = {
 }
 
 export const createImageConfig = async (file: File): Promise<EditableImage> => {
-  const base64url = await toBase64(file)
-  const aspectRatio = await getImageAspectRatio(base64url)
+  const originalUrl = URL.createObjectURL(file)
+  const originalSize = await getImageSize(originalUrl)
 
   return {
-    base64url,
+    originalUrl,
     crop: { x: 0, y: 0, scale: 1 },
-    originalAspectRatio: aspectRatio,
+    originalSize,
   }
 }
 
-const emptyImageConfig = {
+const emptyImageConfig: EditableImage = {
   crop: { x: 0, y: 0, scale: 0 },
-  originalAspectRatio: { x: 0, y: 0 },
+  originalSize: { width: 0, height: 0 },
+  originalUrl: "",
 }
 
 const initialState: PostFormSlice = {
@@ -84,6 +88,9 @@ export const { reducer: postFormReducer, actions: postFormActions } = createSlic
     setCroppedUrl: (draft, { payload: { url, id } }: PayloadAction<{ id: string; url: string }>) => {
       draft.images[id].croppedUrl = url
     },
+    clearCroppedImages: (draft) => {
+      Object.values(draft.images).forEach((v) => delete v.croppedUrl)
+    },
   },
 })
 
@@ -103,6 +110,14 @@ export const postFormThunks = {
         postFormActions.add({
           images: await Promise.all(files.map((file) => createImageConfig(file))),
         })
+      )
+    }
+  },
+  cropImages: () => {
+    return async (dispatch: Dispatch, getState: () => RootState) => {
+      const { images, aspectRatio } = getState().postForm
+      await asyncForEach(Object.entries(images), async ([id, image]) =>
+        dispatch(postFormActions.setCroppedUrl({ url: await cropImage({ ...image, aspectRatio }), id }))
       )
     }
   },
