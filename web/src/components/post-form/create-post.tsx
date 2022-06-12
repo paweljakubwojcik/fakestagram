@@ -52,7 +52,7 @@ export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, open, 
     }
   }, [images])
 
-  const [createPost] = useCreatePost()
+  const [createPost, {loading}] = useCreatePost()
 
   const steps: MultiStepFormProps["steps"] = {
     UPLOADING: {
@@ -78,8 +78,9 @@ export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, open, 
       title: "Say something about your photo",
       content: <PostMetaForm className="animate-opacity" />,
       rightPanelContent: <PostMetaFormPanel />,
-      nextAction: () => {
-        createPost({ images, aspectRatio, description })
+      nextAction: async () => {
+        await createPost({ images, aspectRatio, description })
+        handleClose()
       },
       backAction: () => {
         dispatch(postFormActions.clearCroppedImages())
@@ -110,6 +111,7 @@ export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, open, 
             })
           }
         }}
+        loading={loading}
         {...props}
       />
     </>

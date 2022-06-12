@@ -7,6 +7,7 @@ import { FileUpload } from "components/file-upload"
 import Head from "next/head"
 import { isEmpty } from "ramda"
 import { ArrowLeft } from "react-feather"
+import { Loader } from "./loader"
 
 type Step = {
   title: string
@@ -19,6 +20,7 @@ type Step = {
 export type MultiStepFormProps = ComponentProps<typeof Modal> & {
   steps: Record<string, Step>
   currentStep: string
+  loading?: boolean
 }
 
 const MAIN_WIDTH = 600
@@ -30,6 +32,7 @@ export const MultiStepForm: FC<MultiStepFormProps> = ({
   currentStep,
   onClose,
   open,
+  loading,
   ...props
 }) => {
   const height = MAIN_WIDTH
@@ -69,7 +72,7 @@ export const MultiStepForm: FC<MultiStepFormProps> = ({
           </div>
         </>
       }
-      className="min-h-fit max-h-full m-10 overflow-hidden transition-[width] duration-500"
+      className="min-h-fit max-h-full m-10 overflow-hidden transition-[width] duration-500 relative"
       onClose={() => {
         onClose?.()
       }}
@@ -82,6 +85,11 @@ export const MultiStepForm: FC<MultiStepFormProps> = ({
           {rightPanelContent}
         </div>
       </div>
+      {loading && (
+        <div className="absolute w-full h-full flex justify-center items-center bg-gray-900/70">
+          <Loader />
+        </div>
+      )}
     </Modal>
   )
 }
