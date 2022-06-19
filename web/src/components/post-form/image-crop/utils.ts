@@ -1,4 +1,4 @@
-import { AspectRatio, EditableImage, Size } from "lib/redux/reducers/create-post"
+import { AspectRatio, EditableImage, Size } from "../post-state"
 
 export const bound = (value: number, max: number, min: number) => Math.min(Math.max(min, value), max)
 

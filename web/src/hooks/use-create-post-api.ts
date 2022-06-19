@@ -1,8 +1,8 @@
 import { useCreatePostMutation, useSignedUrlsLazyQuery } from "@graphql"
-import { AspectRatio, EditableImage } from "lib/redux/reducers/create-post"
 import { useState } from "react"
 import axios from "axios"
 import { asyncForEach } from "utils/async-for-each"
+import { AspectRatio, EditableImage } from "components/post-form/post-state"
 
 type CreatePostArguments = {
   images: Record<string, EditableImage>
@@ -10,7 +10,7 @@ type CreatePostArguments = {
   aspectRatio: AspectRatio
 }
 
-export const useCreatePost = () => {
+export const useCreatePostApi = () => {
   const [loading, setLoading] = useState(false)
   const [createPostMutation] = useCreatePostMutation({
     refetchQueries: ["Posts"],
