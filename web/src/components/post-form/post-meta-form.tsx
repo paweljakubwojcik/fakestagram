@@ -31,6 +31,7 @@ export const PostMetaForm: FC<PostMetaFormProps> = ({ className }) => {
 
 export const PostMetaFormPanel = () => {
     const { me } = useAuth()
+    const setDescription = usePostState((state) => state.setDescription)
 
     return (
         <div className="flex flex-col w-72 p-2 ">
@@ -39,6 +40,7 @@ export const PostMetaFormPanel = () => {
                 placeholder="Add description"
                 rows={7}
                 className="bg-transparent resize-none focus:outline-none"
+                onChange={(e) => setDescription(e.target.value)}
             />
         </div>
     )
