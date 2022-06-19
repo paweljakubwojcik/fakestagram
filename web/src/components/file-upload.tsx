@@ -25,7 +25,7 @@ export const FileUpload: FC<FileUploadProps> = ({ className, onChange }) => {
 
   return (
     <label htmlFor="inputid" className={classnames("flex flex-col items-center h-full justify-center", className)}>
-      <div className={classnames(dropping && "child:instagradient child:text-white")}>
+      <div className={classnames(dropping && "child:fill-instagradient child:text-white")}>
         <Files />
       </div>
       <span className="text-xl font-thin my-3">Drag photos and videos here</span>

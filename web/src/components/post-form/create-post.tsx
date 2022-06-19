@@ -1,16 +1,14 @@
-import classnames from "classnames"
-import { Button, IconButton } from "components/buttons"
 import { FileUpload } from "components/file-upload"
-import { Modal } from "components/modal"
-import { useAppDispatch, useAppSelector } from "lib/redux/hooks"
-import { postFormActions, postFormThunks } from "lib/redux/reducers/create-post"
 import Head from "next/head"
-import { isEmpty } from "ramda"
-import { ComponentProps, ComponentPropsWithoutRef, FC, useEffect, useReducer, useState } from "react"
-import { ArrowLeft } from "react-feather"
+
+import { Modal } from "components/modal"
+import { MultiStepForm, MultiStepFormProps } from "components/multistep-form"
+import { useCreatePostApi } from "hooks/use-create-post-api"
+import { isEmpty, pick } from "ramda"
+import { ComponentProps, ComponentPropsWithoutRef, FC, useEffect, useReducer } from "react"
 import { ImageCrop } from "./image-crop/image-crop"
-import { cropImage } from "./image-crop/utils"
-import { PostMetaForm } from "./post-meta-form"
+import { PostMetaForm, PostMetaFormPanel } from "./post-meta-form"
+import { usePostState } from "./post-state"
 
 type CreatePostProps = ComponentPropsWithoutRef<"div"> & ComponentProps<typeof Modal>
 
@@ -19,124 +17,105 @@ type STEP = typeof STEPS[number]
 type StepAction = { type: "NEXT" } | { type: "PREV" } | { type: "SET"; step: STEP }
 
 const stepsReducer = (state: STEP, action: StepAction) => {
-  const currentIndex = STEPS.findIndex((s) => s === state)
-  switch (action.type) {
-    case "NEXT":
-      return STEPS[currentIndex + 1]
-    case "PREV":
-      return STEPS[currentIndex - 1]
-    case "SET":
-      return action.step
-    default:
-      return state
-  }
+    const currentIndex = STEPS.findIndex((s) => s === state)
+    switch (action.type) {
+        case "NEXT":
+            return STEPS[currentIndex + 1]
+        case "PREV":
+            return STEPS[currentIndex - 1]
+        case "SET":
+            return action.step
+        default:
+            return state
+    }
 }
 
-export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, ...props }) => {
-  const { setCroppedUrl, clear } = postFormActions
-  const images = useAppSelector((state) => state.postForm.images)
-  const dispatch = useAppDispatch()
+export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, open, ...props }) => {
+    const { images, aspectRatio, description } = usePostState(pick(["images", "aspectRatio", "description"]))
+    const clear = usePostState((state) => state.clear)
+    const addImages = usePostState((state) => state.add)
+    const cropImages = usePostState((state) => state.cropImages)
+    const clearCroppedImages = usePostState((state) => state.clearCroppedImages)
 
-  const handleAddFiles = async (files: File[]) => {
-    dispatch(postFormThunks.addImages(files))
-    stepDispatch({ type: "SET", step: "CROPPING" })
-  }
-
-  const handleClose = () => {
-    dispatch(clear())
-    onClose?.()
-  }
-
-  const [step, stepDispatch] = useReducer(stepsReducer, STEPS[0])
-  useEffect(() => {
-    if (isEmpty(images)) {
-      stepDispatch({ type: "SET", step: "UPLOADING" })
+    const handleAddFiles = async (files: File[]) => {
+        await addImages(files)
+        stepDispatch({ type: "SET", step: "CROPPING" })
     }
-  }, [images])
 
-  const uploading = step === "UPLOADING"
-  const cropping = step === "CROPPING"
-  const meta = step === "META"
+    const handleClose = () => {
+        clear()
+        onClose?.()
+    }
 
-  const [loading, setLoading] = useState(false)
-
-  const headers: Record<STEP, { title: string; backAction?: () => void; nextAction?: () => void }> = {
-    UPLOADING: {
-      title: "Create new post",
-    },
-    CROPPING: {
-      title: "Crop images",
-      backAction: () => {
-        Modal.open({
-          onAccept: () => dispatch(clear()),
-          title: "Abort creating new post ?",
-          info: "If you close this dialog your changes will be lost.",
-        })
-      },
-      nextAction: async () => {
-        setLoading(true)
-        await Promise.all(
-          Object.entries(images).map(([id, image]) => {
-            return new Promise(async (res) => {
-              dispatch(setCroppedUrl({ url: await cropImage(image), id }))
-              res(true)
-            })
-          })
-        )
-        stepDispatch({ type: "SET", step: "META" })
-        setLoading(false)
-      },
-    },
-    META: {
-      title: "Say something about your photo",
-      nextAction: () => {
-        console.log("publish")
-      },
-      backAction: () => stepDispatch({ type: "PREV" }),
-    },
-  }
-
-  const { title, backAction, nextAction } = headers[step]
-
-  return (
-    <Modal
-      {...props}
-      title={
-        <>
-          <div className="flex justify-between items-center">
-            <IconButton onClick={backAction} className={classnames(!backAction && "invisible")}>
-              <ArrowLeft />
-            </IconButton>
-            <div>{title}</div>
-            <Button onClick={nextAction} className={classnames("py-1", !nextAction && "invisible")}>
-              Next
-            </Button>
-          </div>
-        </>
-      }
-      className="w-full max-w-3xl min-h-fit max-h-full m-10 overflow-hidden"
-      onClose={() => {
+    const [step, stepDispatch] = useReducer(stepsReducer, STEPS[0])
+    useEffect(() => {
         if (isEmpty(images)) {
-          handleClose()
-        } else {
-          Modal.open({
-            onAccept: handleClose,
-            title: "Abort creating new post ?",
-            info: "If you close this dialog your changes will be lost.",
-          })
+            stepDispatch({ type: "SET", step: "UPLOADING" })
         }
-      }}
-    >
-      <Head>
-        <title>Create new post | Fakestagram</title>
-      </Head>
-      {uploading && (
-        <div className="p-4 w-full h-full aspect-square">
-          <FileUpload onChange={handleAddFiles} />
-        </div>
-      )}
-      {cropping && <ImageCrop className="animate-opacity duration-500" />}
-      {meta && <PostMetaForm className="animate-opacity" />}
-    </Modal>
-  )
+    }, [images])
+
+    const [createPost, { loading }] = useCreatePostApi()
+
+    const steps: MultiStepFormProps["steps"] = {
+        UPLOADING: {
+            title: "Create new post",
+            content: <FileUpload onChange={handleAddFiles} />,
+        },
+        CROPPING: {
+            title: "Crop images",
+            content: <ImageCrop className="animate-opacity duration-500" />,
+            backAction: () => {
+                Modal.open({
+                    onAccept: () => clear(),
+                    title: "Abort creating new post ?",
+                    info: "If you close this dialog your changes will be lost.",
+                })
+            },
+            nextAction: async () => {
+                await cropImages()
+                stepDispatch({ type: "SET", step: "META" })
+            },
+        },
+        META: {
+            title: "Say something about your photo",
+            content: <PostMetaForm className="animate-opacity" />,
+            rightPanelContent: <PostMetaFormPanel />,
+            nextAction: async () => {
+                await createPost({ images, aspectRatio, description })
+                handleClose()
+            },
+            backAction: () => {
+                clearCroppedImages()
+                stepDispatch({ type: "PREV" })
+            },
+        },
+    }
+
+    return (
+        <>
+            {open && (
+                <Head>
+                    <title>Create new post | Fakestagram</title>
+                </Head>
+            )}
+            <MultiStepForm
+                open={open}
+                steps={steps}
+                currentStep={step}
+                onClose={() => {
+                    if (isEmpty(images)) {
+                        handleClose()
+                    } else {
+                        Modal.open({
+                            onAccept: handleClose,
+                            title: "Abort creating new post ?",
+                            info: "If you close this dialog your changes will be lost.",
+                        })
+                    }
+                }}
+                loading={loading}
+                {...props}
+            />
+        </>
+    )
 }

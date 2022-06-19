@@ -57,7 +57,7 @@ const Register: NextPage = () => {
       <div className="w-full max-w-[360px]">
         <Formik onSubmit={onSubmit} initialValues={initialValues} validationSchema={registerValidation}>
           {({ isValid, isSubmitting }: FormikProps<RegisterFormValues>) => (
-            <Card component={Form} className="p-8 dark:bg-gray-800">
+            <Card component={Form} className="p-8" light>
               <h1 className="text-lg mx-auto">Register to fakestagram</h1>
               <div className="flex flex-col space-y-2 my-4">
                 <InputField name="username" label="Username" />
@@ -80,7 +80,7 @@ const Register: NextPage = () => {
           )}
         </Formik>
 
-        <Card className="py-6 dark:bg-gray-800">
+        <Card className="py-6" light>
           <div className="text-center">
             Already have an account?{" "}
             <Link href={"/login"}>

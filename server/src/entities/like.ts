@@ -11,6 +11,6 @@ export class Like extends BaseEntityWithoutId {
   @ManyToOne({ primary: true })
   user: User
 
-  @ManyToOne({ primary: true })
+  @ManyToOne(() => Post, { primary: true })
   post: Post
 }

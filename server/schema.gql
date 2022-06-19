@@ -15,7 +15,15 @@ scalar DateTime
 
 type Edge {
   cursor: String
-  node: Post
+  node: Post!
+}
+
+type Image {
+  createdAt: DateTime!
+  id: String!
+  post: Post!
+  updatedAt: DateTime!
+  url: UrlSet!
 }
 
 type Like {
@@ -25,31 +33,31 @@ type Like {
 }
 
 type Mutation {
-  createPost(body: String!, title: String!): Post!
+  createPost(aspectRatio: String!, description: String!, images: [String!]!): Post!
   deletePost(id: String!): Boolean!
-  dislikePost(post: String!): Boolean!
-  likePost(post: String!): Boolean!
+  likeOrDislikePost(like: Boolean!, post: String!): Post!
   login(credentials: Credentials!): User!
   logout: Boolean!
   register(credentials: Credentials!): User!
-  updatePost(body: String, id: String!, title: String): Post
+  updatePost(description: String, id: String!): Post
 }
 
 type Post {
-  body: String!
+  aspectRatio: String!
   createdAt: DateTime!
   creator: User!
+  description: String!
   id: String!
+  images: [Image!]!
   likeCount: Float!
   likedByMe: Boolean!
   likes: [Like!]!
-  title: String!
   updatedAt: DateTime!
 }
 
 type PostConnection {
-  edges: [Edge!]
-  pageInfo: PostPageInfo
+  edges: [Edge!]!
+  pageInfo: PostPageInfo!
 }
 
 type PostPageInfo {
@@ -70,7 +78,22 @@ type Query {
   isUsernameAvailable(username: String!): Boolean!
   me: User
   post(id: ID!): Post
-  posts(after: ID, before: ID, first: Float, last: Float, sort: PostSort = createdAt): PostConnection!
+  posts(after: ID, before: ID, first: Int, last: Int, order: SortDir = ASC, sort: PostSort = createdAt): PostConnection!
+  signedUrl(filename: String!): String!
+  signedUrls(filenames: [String!]!): [String!]!
+}
+
+"""Order of sorting"""
+enum SortDir {
+  ASC
+  DESC
+}
+
+type UrlSet {
+  large: String!
+  medium: String!
+  original: String!
+  small: String!
 }
 
 type User {

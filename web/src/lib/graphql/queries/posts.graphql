@@ -1,0 +1,16 @@
+query Posts($last: Int, $before: ID, $first: Int, $after: ID, $sort: PostSort, $order: SortDir) {
+  posts(last: $last, before: $before, first: $first, after: $after, sort: $sort, order: $order) {
+    edges {
+      cursor
+      node {
+        ...BasicPostFragment
+      }
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasPreviousPage
+      hasNextPage
+    }
+  }
+}

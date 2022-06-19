@@ -25,7 +25,16 @@ export type Credentials = {
 export type Edge = {
   __typename?: 'Edge';
   cursor?: Maybe<Scalars['String']>;
-  node?: Maybe<Post>;
+  node: Post;
+};
+
+export type Image = {
+  __typename?: 'Image';
+  createdAt: Scalars['DateTime'];
+  id: Scalars['String'];
+  post: Post;
+  updatedAt: Scalars['DateTime'];
+  url: UrlSet;
 };
 
 export type Like = {
@@ -39,8 +48,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   createPost: Post;
   deletePost: Scalars['Boolean'];
-  dislikePost: Scalars['Boolean'];
-  likePost: Scalars['Boolean'];
+  likeOrDislikePost: Post;
   login: User;
   logout: Scalars['Boolean'];
   register: User;
@@ -49,8 +57,9 @@ export type Mutation = {
 
 
 export type MutationCreatePostArgs = {
-  body: Scalars['String'];
-  title: Scalars['String'];
+  aspectRatio: Scalars['String'];
+  description: Scalars['String'];
+  images: Array<Scalars['String']>;
 };
 
 
@@ -59,12 +68,8 @@ export type MutationDeletePostArgs = {
 };
 
 
-export type MutationDislikePostArgs = {
-  post: Scalars['String'];
-};
-
-
-export type MutationLikePostArgs = {
+export type MutationLikeOrDislikePostArgs = {
+  like: Scalars['Boolean'];
   post: Scalars['String'];
 };
 
@@ -80,28 +85,28 @@ export type MutationRegisterArgs = {
 
 
 export type MutationUpdatePostArgs = {
-  body?: InputMaybe<Scalars['String']>;
+  description?: InputMaybe<Scalars['String']>;
   id: Scalars['String'];
-  title?: InputMaybe<Scalars['String']>;
 };
 
 export type Post = {
   __typename?: 'Post';
-  body: Scalars['String'];
+  aspectRatio: Scalars['String'];
   createdAt: Scalars['DateTime'];
   creator: User;
+  description: Scalars['String'];
   id: Scalars['String'];
+  images: Array<Image>;
   likeCount: Scalars['Float'];
   likedByMe: Scalars['Boolean'];
   likes: Array<Like>;
-  title: Scalars['String'];
   updatedAt: Scalars['DateTime'];
 };
 
 export type PostConnection = {
   __typename?: 'PostConnection';
-  edges?: Maybe<Array<Edge>>;
-  pageInfo?: Maybe<PostPageInfo>;
+  edges: Array<Edge>;
+  pageInfo: PostPageInfo;
 };
 
 export type PostPageInfo = {
@@ -125,6 +130,8 @@ export type Query = {
   me?: Maybe<User>;
   post?: Maybe<Post>;
   posts: PostConnection;
+  signedUrl: Scalars['String'];
+  signedUrls: Array<Scalars['String']>;
 };
 
 
@@ -141,9 +148,34 @@ export type QueryPostArgs = {
 export type QueryPostsArgs = {
   after?: InputMaybe<Scalars['ID']>;
   before?: InputMaybe<Scalars['ID']>;
-  first?: InputMaybe<Scalars['Float']>;
-  last?: InputMaybe<Scalars['Float']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  order?: InputMaybe<SortDir>;
   sort?: InputMaybe<PostSort>;
+};
+
+
+export type QuerySignedUrlArgs = {
+  filename: Scalars['String'];
+};
+
+
+export type QuerySignedUrlsArgs = {
+  filenames: Array<Scalars['String']>;
+};
+
+/** Order of sorting */
+export enum SortDir {
+  Asc = 'ASC',
+  Desc = 'DESC'
+}
+
+export type UrlSet = {
+  __typename?: 'UrlSet';
+  large: Scalars['String'];
+  medium: Scalars['String'];
+  original: Scalars['String'];
+  small: Scalars['String'];
 };
 
 export type User = {
@@ -155,7 +187,28 @@ export type User = {
   username: Scalars['String'];
 };
 
+export type LikesFragment = { __typename?: 'Post', id: string, likedByMe: boolean, likeCount: number };
+
+export type BasicPostFragmentFragment = { __typename?: 'Post', id: string, createdAt: any, updatedAt: any, description: string, aspectRatio: string, likedByMe: boolean, likeCount: number, images: Array<{ __typename?: 'Image', id: string, url: { __typename?: 'UrlSet', original: string, small: string } }>, creator: { __typename?: 'User', id: string, username: string } };
+
 export type UserFragmentFragment = { __typename?: 'User', username: string, id: string };
+
+export type CreatePostMutationVariables = Exact<{
+  description: Scalars['String'];
+  images: Array<Scalars['String']> | Scalars['String'];
+  aspectRatio: Scalars['String'];
+}>;
+
+
+export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'Post', id: string, createdAt: any, updatedAt: any, description: string, aspectRatio: string, likedByMe: boolean, likeCount: number, images: Array<{ __typename?: 'Image', id: string, url: { __typename?: 'UrlSet', original: string, small: string } }>, creator: { __typename?: 'User', id: string, username: string } } };
+
+export type LikeOrDislikePostMutationVariables = Exact<{
+  post: Scalars['String'];
+  like: Scalars['Boolean'];
+}>;
+
+
+export type LikeOrDislikePostMutation = { __typename?: 'Mutation', likeOrDislikePost: { __typename?: 'Post', id: string, likedByMe: boolean, likeCount: number } };
 
 export type LoginMutationVariables = Exact<{
   username: Scalars['String'];
@@ -178,17 +231,152 @@ export type RegisterMutationVariables = Exact<{
 
 export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'User', username: string, id: string } };
 
+export type IsUsernameAvailableQueryVariables = Exact<{
+  username: Scalars['String'];
+}>;
+
+
+export type IsUsernameAvailableQuery = { __typename?: 'Query', isUsernameAvailable: boolean };
+
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', username: string, id: string } | null };
 
+export type PostsQueryVariables = Exact<{
+  last?: InputMaybe<Scalars['Int']>;
+  before?: InputMaybe<Scalars['ID']>;
+  first?: InputMaybe<Scalars['Int']>;
+  after?: InputMaybe<Scalars['ID']>;
+  sort?: InputMaybe<PostSort>;
+  order?: InputMaybe<SortDir>;
+}>;
+
+
+export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PostConnection', edges: Array<{ __typename?: 'Edge', cursor?: string | null, node: { __typename?: 'Post', id: string, createdAt: any, updatedAt: any, description: string, aspectRatio: string, likedByMe: boolean, likeCount: number, images: Array<{ __typename?: 'Image', id: string, url: { __typename?: 'UrlSet', original: string, small: string } }>, creator: { __typename?: 'User', id: string, username: string } } }>, pageInfo: { __typename?: 'PostPageInfo', startCursor?: string | null, endCursor?: string | null, hasPreviousPage: boolean, hasNextPage: boolean } } };
+
+export type SignedUrlQueryVariables = Exact<{
+  filename: Scalars['String'];
+}>;
+
+
+export type SignedUrlQuery = { __typename?: 'Query', signedUrl: string };
+
+export type SignedUrlsQueryVariables = Exact<{
+  filenames: Array<Scalars['String']> | Scalars['String'];
+}>;
+
+
+export type SignedUrlsQuery = { __typename?: 'Query', signedUrls: Array<string> };
+
+export const LikesFragmentDoc = gql`
+    fragment Likes on Post {
+  id
+  likedByMe
+  likeCount
+}
+    `;
+export const BasicPostFragmentFragmentDoc = gql`
+    fragment BasicPostFragment on Post {
+  id
+  createdAt
+  updatedAt
+  description
+  aspectRatio
+  likedByMe
+  likeCount
+  images {
+    id
+    url {
+      original
+      small
+    }
+  }
+  creator {
+    id
+    username
+  }
+}
+    `;
 export const UserFragmentFragmentDoc = gql`
     fragment UserFragment on User {
   username
   id
 }
     `;
+export const CreatePostDocument = gql`
+    mutation CreatePost($description: String!, $images: [String!]!, $aspectRatio: String!) {
+  createPost(
+    description: $description
+    images: $images
+    aspectRatio: $aspectRatio
+  ) {
+    ...BasicPostFragment
+  }
+}
+    ${BasicPostFragmentFragmentDoc}`;
+export type CreatePostMutationFn = Apollo.MutationFunction<CreatePostMutation, CreatePostMutationVariables>;
+
+/**
+ * __useCreatePostMutation__
+ *
+ * To run a mutation, you first call `useCreatePostMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreatePostMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createPostMutation, { data, loading, error }] = useCreatePostMutation({
+ *   variables: {
+ *      description: // value for 'description'
+ *      images: // value for 'images'
+ *      aspectRatio: // value for 'aspectRatio'
+ *   },
+ * });
+ */
+export function useCreatePostMutation(baseOptions?: Apollo.MutationHookOptions<CreatePostMutation, CreatePostMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreatePostMutation, CreatePostMutationVariables>(CreatePostDocument, options);
+      }
+export type CreatePostMutationHookResult = ReturnType<typeof useCreatePostMutation>;
+export type CreatePostMutationResult = Apollo.MutationResult<CreatePostMutation>;
+export type CreatePostMutationOptions = Apollo.BaseMutationOptions<CreatePostMutation, CreatePostMutationVariables>;
+export const LikeOrDislikePostDocument = gql`
+    mutation LikeOrDislikePost($post: String!, $like: Boolean!) {
+  likeOrDislikePost(post: $post, like: $like) {
+    ...Likes
+  }
+}
+    ${LikesFragmentDoc}`;
+export type LikeOrDislikePostMutationFn = Apollo.MutationFunction<LikeOrDislikePostMutation, LikeOrDislikePostMutationVariables>;
+
+/**
+ * __useLikeOrDislikePostMutation__
+ *
+ * To run a mutation, you first call `useLikeOrDislikePostMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useLikeOrDislikePostMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [likeOrDislikePostMutation, { data, loading, error }] = useLikeOrDislikePostMutation({
+ *   variables: {
+ *      post: // value for 'post'
+ *      like: // value for 'like'
+ *   },
+ * });
+ */
+export function useLikeOrDislikePostMutation(baseOptions?: Apollo.MutationHookOptions<LikeOrDislikePostMutation, LikeOrDislikePostMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<LikeOrDislikePostMutation, LikeOrDislikePostMutationVariables>(LikeOrDislikePostDocument, options);
+      }
+export type LikeOrDislikePostMutationHookResult = ReturnType<typeof useLikeOrDislikePostMutation>;
+export type LikeOrDislikePostMutationResult = Apollo.MutationResult<LikeOrDislikePostMutation>;
+export type LikeOrDislikePostMutationOptions = Apollo.BaseMutationOptions<LikeOrDislikePostMutation, LikeOrDislikePostMutationVariables>;
 export const LoginDocument = gql`
     mutation Login($username: String!, $password: String!) {
   login(credentials: {username: $username, password: $password}) {
@@ -287,6 +475,39 @@ export function useRegisterMutation(baseOptions?: Apollo.MutationHookOptions<Reg
 export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
 export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
 export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
+export const IsUsernameAvailableDocument = gql`
+    query IsUsernameAvailable($username: String!) {
+  isUsernameAvailable(username: $username)
+}
+    `;
+
+/**
+ * __useIsUsernameAvailableQuery__
+ *
+ * To run a query within a React component, call `useIsUsernameAvailableQuery` and pass it any options that fit your needs.
+ * When your component renders, `useIsUsernameAvailableQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useIsUsernameAvailableQuery({
+ *   variables: {
+ *      username: // value for 'username'
+ *   },
+ * });
+ */
+export function useIsUsernameAvailableQuery(baseOptions: Apollo.QueryHookOptions<IsUsernameAvailableQuery, IsUsernameAvailableQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<IsUsernameAvailableQuery, IsUsernameAvailableQueryVariables>(IsUsernameAvailableDocument, options);
+      }
+export function useIsUsernameAvailableLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<IsUsernameAvailableQuery, IsUsernameAvailableQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<IsUsernameAvailableQuery, IsUsernameAvailableQueryVariables>(IsUsernameAvailableDocument, options);
+        }
+export type IsUsernameAvailableQueryHookResult = ReturnType<typeof useIsUsernameAvailableQuery>;
+export type IsUsernameAvailableLazyQueryHookResult = ReturnType<typeof useIsUsernameAvailableLazyQuery>;
+export type IsUsernameAvailableQueryResult = Apollo.QueryResult<IsUsernameAvailableQuery, IsUsernameAvailableQueryVariables>;
 export const MeDocument = gql`
     query Me {
   me {
@@ -321,6 +542,130 @@ export function useMeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeQuery
 export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
 export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
+export const PostsDocument = gql`
+    query Posts($last: Int, $before: ID, $first: Int, $after: ID, $sort: PostSort, $order: SortDir) {
+  posts(
+    last: $last
+    before: $before
+    first: $first
+    after: $after
+    sort: $sort
+    order: $order
+  ) {
+    edges {
+      cursor
+      node {
+        ...BasicPostFragment
+      }
+    }
+    pageInfo {
+      startCursor
+      endCursor
+      hasPreviousPage
+      hasNextPage
+    }
+  }
+}
+    ${BasicPostFragmentFragmentDoc}`;
+
+/**
+ * __usePostsQuery__
+ *
+ * To run a query within a React component, call `usePostsQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePostsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePostsQuery({
+ *   variables: {
+ *      last: // value for 'last'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *      sort: // value for 'sort'
+ *      order: // value for 'order'
+ *   },
+ * });
+ */
+export function usePostsQuery(baseOptions?: Apollo.QueryHookOptions<PostsQuery, PostsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PostsQuery, PostsQueryVariables>(PostsDocument, options);
+      }
+export function usePostsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PostsQuery, PostsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PostsQuery, PostsQueryVariables>(PostsDocument, options);
+        }
+export type PostsQueryHookResult = ReturnType<typeof usePostsQuery>;
+export type PostsLazyQueryHookResult = ReturnType<typeof usePostsLazyQuery>;
+export type PostsQueryResult = Apollo.QueryResult<PostsQuery, PostsQueryVariables>;
+export const SignedUrlDocument = gql`
+    query SignedUrl($filename: String!) {
+  signedUrl(filename: $filename)
+}
+    `;
+
+/**
+ * __useSignedUrlQuery__
+ *
+ * To run a query within a React component, call `useSignedUrlQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSignedUrlQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSignedUrlQuery({
+ *   variables: {
+ *      filename: // value for 'filename'
+ *   },
+ * });
+ */
+export function useSignedUrlQuery(baseOptions: Apollo.QueryHookOptions<SignedUrlQuery, SignedUrlQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SignedUrlQuery, SignedUrlQueryVariables>(SignedUrlDocument, options);
+      }
+export function useSignedUrlLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SignedUrlQuery, SignedUrlQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SignedUrlQuery, SignedUrlQueryVariables>(SignedUrlDocument, options);
+        }
+export type SignedUrlQueryHookResult = ReturnType<typeof useSignedUrlQuery>;
+export type SignedUrlLazyQueryHookResult = ReturnType<typeof useSignedUrlLazyQuery>;
+export type SignedUrlQueryResult = Apollo.QueryResult<SignedUrlQuery, SignedUrlQueryVariables>;
+export const SignedUrlsDocument = gql`
+    query SignedUrls($filenames: [String!]!) {
+  signedUrls(filenames: $filenames)
+}
+    `;
+
+/**
+ * __useSignedUrlsQuery__
+ *
+ * To run a query within a React component, call `useSignedUrlsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSignedUrlsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSignedUrlsQuery({
+ *   variables: {
+ *      filenames: // value for 'filenames'
+ *   },
+ * });
+ */
+export function useSignedUrlsQuery(baseOptions: Apollo.QueryHookOptions<SignedUrlsQuery, SignedUrlsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SignedUrlsQuery, SignedUrlsQueryVariables>(SignedUrlsDocument, options);
+      }
+export function useSignedUrlsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SignedUrlsQuery, SignedUrlsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SignedUrlsQuery, SignedUrlsQueryVariables>(SignedUrlsDocument, options);
+        }
+export type SignedUrlsQueryHookResult = ReturnType<typeof useSignedUrlsQuery>;
+export type SignedUrlsLazyQueryHookResult = ReturnType<typeof useSignedUrlsLazyQuery>;
+export type SignedUrlsQueryResult = Apollo.QueryResult<SignedUrlsQuery, SignedUrlsQueryVariables>;
 
       export interface PossibleTypesResultData {
         possibleTypes: {

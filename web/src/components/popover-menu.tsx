@@ -38,6 +38,7 @@ export const PopoverMenu: FC<PopoverMenuProps> = ({ className, children, content
       isOpen={isOpen}
       positions={["bottom"]}
       onClickOutside={() => setOpen(false)}
+      containerClassName="z-50"
       content={({ position, childRect, popoverRect }) => (
         <CustomArrowContainer
           position={position}

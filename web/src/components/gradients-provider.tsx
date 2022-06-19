@@ -1,5 +1,4 @@
-import type { FC, ComponentPropsWithoutRef } from "react"
-import classnames from "classnames"
+import type { FC } from "react"
 
 /**
  * Component that provides svg gradients trough an application, needs to be anywhere in the component tree

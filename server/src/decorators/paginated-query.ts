@@ -27,7 +27,7 @@ export function createConnection<T>(
     @Field({ nullable: true })
     public cursor!: string
 
-    @Field(() => TItemClass, { nullable: true })
+    @Field(() => TItemClass)
     public node!: T
   }
 
@@ -50,10 +50,10 @@ export function createConnection<T>(
   class Connection implements RelayResponse<T> {
     public name = `${name}Connection`
 
-    @Field(() => [Edge], { nullable: true })
+    @Field(() => [Edge])
     public edges!: IEdge<T>[]
 
-    @Field(() => PageInfo, { nullable: true })
+    @Field(() => PageInfo)
     public pageInfo!: PageInfo
   }
 

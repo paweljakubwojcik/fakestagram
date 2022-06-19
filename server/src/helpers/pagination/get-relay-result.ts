@@ -3,20 +3,30 @@ import { QueryBuilder } from "@mikro-orm/postgresql"
 import { BaseEntity } from "src/entities/base-entity"
 import { RelayResponse } from "src/types/relay-pagination"
 import { DefaultRelaySort } from "./default-relay-sort"
-import { RelayPaginationArgs } from "./relay-pagination-args"
+import { RelayPaginationArgs, SortDir } from "./relay-pagination-args"
 
-export const getRelayResult = async <T extends BaseEntity, S extends string = DefaultRelaySort>(
+export const getRelayResult = async <
+  T extends BaseEntity,
+  S extends string = DefaultRelaySort
+>(
   query: QueryBuilder<T>,
   paginationOptions: RelayPaginationArgs<S>
 ): Promise<RelayResponse<T>> => {
-  const { after, before, first, last, sort } = paginationOptions
+  const {
+    after,
+    before,
+    first,
+    last,
+    sort,
+    order: sortOrder,
+  } = paginationOptions
 
   const { cursor, relation } = (() => {
     if (after) {
-      return { cursor: after, relation: "$gte" }
+      return { cursor: after, relation: sortOrder === SortDir.ASC ? "$gte" : "$lte" }
     }
     if (before) {
-      return { cursor: before, relation: "$lte" }
+      return { cursor: before, relation: sortOrder === SortDir.ASC ? "$lte" : "$gte" }
     }
     return { cursor: "", relation: "" }
   })()
@@ -31,12 +41,23 @@ export const getRelayResult = async <T extends BaseEntity, S extends string = De
   }
 
   const order = (() => {
-    if (first) {
-      return QueryOrder.ASC
+    if (sortOrder === SortDir.ASC) {
+      if (first) {
+        return QueryOrder.ASC
+      }
+      if (last) {
+        return QueryOrder.DESC
+      }
     }
-    if (last) {
-      return QueryOrder.DESC
+    if (sortOrder === SortDir.DESC) {
+      if (first) {
+        return QueryOrder.DESC
+      }
+      if (last) {
+        return QueryOrder.ASC
+      }
     }
+
     throw Error
   })()
 

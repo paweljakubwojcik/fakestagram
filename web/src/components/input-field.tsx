@@ -15,12 +15,12 @@ export const InputField = memo(<T,>({ className, name, validate, label, ...props
 
   return (
     <div className="w-full">
-      <div className="relative w-full flex items-center">
+      <div className="relative w-full flex items-center mt-2">
         <label
           htmlFor={name}
           className={classnames(
             "absolute text-gray-400 px-1 ml-1 pointer-events-none transform origin-top-left transition-all",
-            value && "-translate-y-full scale-90 bg-inherit"
+            value && "-translate-y-[150%] -translate-x-2 scale-90 bg-inherit"
           )}
         >
           {label}

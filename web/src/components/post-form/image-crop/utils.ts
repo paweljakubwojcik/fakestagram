@@ -1,4 +1,4 @@
-import { AspectRatio, EditableImage } from "lib/redux/reducers/create-post"
+import { AspectRatio, EditableImage, Size } from "../post-state"
 
 export const bound = (value: number, max: number, min: number) => Math.min(Math.max(min, value), max)
 
@@ -27,14 +27,17 @@ export const getBoundary = (picRef: HTMLDivElement, viewportRef: HTMLDivElement)
 }
 
 type GetWidthAndHeightOptions = {
-  originalAspectRatio: AspectRatio
+  originalSize: Size
   aspectRatio: AspectRatio
   height: number
   width: number
 }
-export const getWidthAndHeight = ({ aspectRatio, originalAspectRatio, width, height }: GetWidthAndHeightOptions) => {
-  const widthToHeight = originalAspectRatio.x / originalAspectRatio.y
-  const heightToWidth = originalAspectRatio.y / originalAspectRatio.x
+/**
+ * Compute dimensions that image should have, given the desired aspect ratio and container dimensions
+ */
+export const getWidthAndHeight = ({ aspectRatio, originalSize, width, height }: GetWidthAndHeightOptions) => {
+  const widthToHeight = originalSize.width / originalSize.height
+  const heightToWidth = originalSize.height / originalSize.width
   if (aspectRatio.y > aspectRatio.x) {
     return {
       width: height * widthToHeight,
@@ -67,13 +70,10 @@ export const getWidthAndHeight = ({ aspectRatio, originalAspectRatio, width, hei
   }
 }
 
-export const cropImage = ({
-  base64url: src,
-  aspectRatio,
-  crop: { scale, x, y },
-  originalAspectRatio,
-}: EditableImage) => {
-  const { x: originalWidth, y: originalHeight } = originalAspectRatio
+type CropImageOptions = EditableImage & { aspectRatio: AspectRatio }
+
+export const cropImage = ({ originalUrl: src, aspectRatio, crop: { scale, x, y }, originalSize }: CropImageOptions) => {
+  const { width: originalWidth, height: originalHeight } = originalSize
   const canvas = document.createElement("canvas")
 
   const ctx = canvas.getContext("2d")
@@ -99,8 +99,8 @@ export const cropImage = ({
     }
   }
 
-  let sx = -((width - originalWidth * scale) / 2 + x) / scale
-  let sy = -((height - originalHeight * scale) / 2 + y) / scale
+  const sx = -((width - originalWidth * scale) / 2 + x) / scale
+  const sy = -((height - originalHeight * scale) / 2 + y) / scale
 
   canvas.width = width
   canvas.height = height

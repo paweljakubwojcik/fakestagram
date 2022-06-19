@@ -1,5 +1,6 @@
 import { ApolloError, UserInputError } from "apollo-server-core"
 import { PaginatedQuery, RelayArgs } from "src/decorators/paginated-query"
+import { Image } from "src/entities/image"
 import { Like } from "src/entities/like"
 import { Post } from "src/entities/post"
 import { User } from "src/entities/user"
@@ -24,20 +25,20 @@ import {
 } from "type-graphql"
 
 @ArgsType()
-class AddPostInput implements Partial<Post> {
+class AddPostInput {
   @Field()
-  title: string
+  description: string
 
-  @Field()
-  body: string
+  @Field(() => [String])
+  images: string[]
+
+  @Field(() => String)
+  aspectRatio: string
 }
 @ArgsType()
 class UpdatePostInput implements Partial<Post> {
   @Field({ nullable: true })
-  title?: string
-
-  @Field({ nullable: true })
-  body?: string
+  description?: string
 }
 
 enum PostSort {
@@ -107,17 +108,28 @@ export class PostResolver {
     return true
   }
 
-  // TODO: maybe merge those two into one ?
-  @Mutation(() => Boolean)
+  @Mutation(() => Post)
   @UseMiddleware(isAuth)
-  async likePost(@Arg("post") id: string, @Ctx() { em, req }: MyContext) {
+  async likeOrDislikePost(
+    @Arg("post") id: string,
+    @Arg("like") like: boolean,
+    @Ctx() { em, req }: MyContext
+  ) {
     try {
-      await em.persistAndFlush(
-        em.create(Like, {
+      if (like) {
+        await em.persistAndFlush(
+          em.create(Like, {
+            post: em.getReference(Post, id),
+            user: em.getReference(User, req.session.userId!),
+          })
+        )
+      } else {
+        const like = await em.findOneOrFail(Like, {
           post: em.getReference(Post, id),
           user: em.getReference(User, req.session.userId!),
         })
-      )
+        em.removeAndFlush(like)
+      }
     } catch (e) {
       if (e.name === "UniqueConstraintViolationException") {
         throw new ApolloError("Post is already liked")
@@ -125,27 +137,13 @@ export class PostResolver {
       if (e.name === "ForeignKeyConstraintViolationException") {
         throw new UserInputError("Post does not exist or have been deleted")
       }
-      throw e
-    }
-    return true
-  }
-
-  @Mutation(() => Boolean)
-  @UseMiddleware(isAuth)
-  async dislikePost(@Arg("post") id: string, @Ctx() { em, req }: MyContext) {
-    try {
-      const like = await em.findOneOrFail(Like, {
-        post: em.getReference(Post, id),
-        user: em.getReference(User, req.session.userId!),
-      })
-      em.removeAndFlush(like)
-    } catch (e) {
       if (e.name === "NotFoundError") {
         throw new ApolloError("Post doesn't exist or is not liked by you")
       }
       throw e
+    } finally {
+      return em.findOne(Post, { id })
     }
-    return true
   }
 
   @FieldResolver()
@@ -153,9 +151,16 @@ export class PostResolver {
     return await em.findOne(User, { id: post.creator.id })
   }
 
+  @FieldResolver()
+  async images(@Root() post: Post, @Ctx() { em }: MyContext) {
+    return await em.find(Image, { post: post.id })
+  }
+
   @FieldResolver(() => [Like])
   async likes(@Root() post: Post, @Ctx() { em }: MyContext) {
+    console.log(post)
     await em.populate(post, ["likes.user"])
+    console.log(post)
     return post.likes
   }
 
