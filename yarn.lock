@@ -2507,6 +2507,11 @@
     "@types/mime" "^1"
     "@types/node" "*"
 
+"@types/tailwindcss@^3.0.10":
+  version "3.0.10"
+  resolved "https://registry.yarnpkg.com/@types/tailwindcss/-/tailwindcss-3.0.10.tgz#cd54bad9c00b4823e9e33c67af585347f235aa11"
+  integrity sha512-1UnZIHO0NOPyPlPFV0HuMjki2SHkvG9uBA1ZehWj/OQMSROk503nuNyyfmJSIT289yewxTbKoPG+KLxYRvfIIg==
+
 "@types/uuid@^8.3.4":
   version "8.3.4"
   resolved "https://registry.yarnpkg.com/@types/uuid/-/uuid-8.3.4.tgz#bd86a43617df0594787d38b735f55c805becf1bc"
