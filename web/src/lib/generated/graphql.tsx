@@ -48,10 +48,12 @@ export type Mutation = {
   __typename?: 'Mutation';
   createPost: Post;
   deletePost: Scalars['Boolean'];
+  follow: User;
   likeOrDislikePost: Post;
   login: User;
   logout: Scalars['Boolean'];
   register: User;
+  unFollow: User;
   updatePost?: Maybe<Post>;
 };
 
@@ -65,6 +67,11 @@ export type MutationCreatePostArgs = {
 
 export type MutationDeletePostArgs = {
   id: Scalars['String'];
+};
+
+
+export type MutationFollowArgs = {
+  userId: Scalars['String'];
 };
 
 
@@ -84,6 +91,11 @@ export type MutationRegisterArgs = {
 };
 
 
+export type MutationUnFollowArgs = {
+  userId: Scalars['String'];
+};
+
+
 export type MutationUpdatePostArgs = {
   description?: InputMaybe<Scalars['String']>;
   id: Scalars['String'];
@@ -92,8 +104,8 @@ export type MutationUpdatePostArgs = {
 export type Post = {
   __typename?: 'Post';
   aspectRatio: Scalars['String'];
+  author: User;
   createdAt: Scalars['DateTime'];
-  creator: User;
   description: Scalars['String'];
   id: Scalars['String'];
   images: Array<Image>;
@@ -132,6 +144,8 @@ export type Query = {
   posts: PostConnection;
   signedUrl: Scalars['String'];
   signedUrls: Array<Scalars['String']>;
+  /** User public info */
+  user: User;
 };
 
 
@@ -164,6 +178,11 @@ export type QuerySignedUrlsArgs = {
   filenames: Array<Scalars['String']>;
 };
 
+
+export type QueryUserArgs = {
+  username: Scalars['String'];
+};
+
 /** Order of sorting */
 export enum SortDir {
   Asc = 'ASC',
@@ -181,15 +200,26 @@ export type UrlSet = {
 export type User = {
   __typename?: 'User';
   createdAt: Scalars['DateTime'];
+  followers: Array<User>;
   id: Scalars['String'];
-  posts: Array<Post>;
+  posts: PostConnection;
   updatedAt: Scalars['DateTime'];
   username: Scalars['String'];
 };
 
+
+export type UserPostsArgs = {
+  after?: InputMaybe<Scalars['ID']>;
+  before?: InputMaybe<Scalars['ID']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  order?: InputMaybe<SortDir>;
+  sort?: InputMaybe<PostSort>;
+};
+
 export type LikesFragment = { __typename?: 'Post', id: string, likedByMe: boolean, likeCount: number };
 
-export type BasicPostFragmentFragment = { __typename?: 'Post', id: string, createdAt: any, updatedAt: any, description: string, aspectRatio: string, likedByMe: boolean, likeCount: number, images: Array<{ __typename?: 'Image', id: string, url: { __typename?: 'UrlSet', original: string, small: string } }>, creator: { __typename?: 'User', id: string, username: string } };
+export type BasicPostFragmentFragment = { __typename?: 'Post', id: string, createdAt: any, updatedAt: any, description: string, aspectRatio: string, likedByMe: boolean, likeCount: number, images: Array<{ __typename?: 'Image', id: string, url: { __typename?: 'UrlSet', original: string, small: string } }>, author: { __typename?: 'User', id: string, username: string } };
 
 export type UserFragmentFragment = { __typename?: 'User', username: string, id: string };
 
@@ -200,7 +230,7 @@ export type CreatePostMutationVariables = Exact<{
 }>;
 
 
-export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'Post', id: string, createdAt: any, updatedAt: any, description: string, aspectRatio: string, likedByMe: boolean, likeCount: number, images: Array<{ __typename?: 'Image', id: string, url: { __typename?: 'UrlSet', original: string, small: string } }>, creator: { __typename?: 'User', id: string, username: string } } };
+export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'Post', id: string, createdAt: any, updatedAt: any, description: string, aspectRatio: string, likedByMe: boolean, likeCount: number, images: Array<{ __typename?: 'Image', id: string, url: { __typename?: 'UrlSet', original: string, small: string } }>, author: { __typename?: 'User', id: string, username: string } } };
 
 export type LikeOrDislikePostMutationVariables = Exact<{
   post: Scalars['String'];
@@ -253,7 +283,7 @@ export type PostsQueryVariables = Exact<{
 }>;
 
 
-export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PostConnection', edges: Array<{ __typename?: 'Edge', cursor?: string | null, node: { __typename?: 'Post', id: string, createdAt: any, updatedAt: any, description: string, aspectRatio: string, likedByMe: boolean, likeCount: number, images: Array<{ __typename?: 'Image', id: string, url: { __typename?: 'UrlSet', original: string, small: string } }>, creator: { __typename?: 'User', id: string, username: string } } }>, pageInfo: { __typename?: 'PostPageInfo', startCursor?: string | null, endCursor?: string | null, hasPreviousPage: boolean, hasNextPage: boolean } } };
+export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PostConnection', edges: Array<{ __typename?: 'Edge', cursor?: string | null, node: { __typename?: 'Post', id: string, createdAt: any, updatedAt: any, description: string, aspectRatio: string, likedByMe: boolean, likeCount: number, images: Array<{ __typename?: 'Image', id: string, url: { __typename?: 'UrlSet', original: string, small: string } }>, author: { __typename?: 'User', id: string, username: string } } }>, pageInfo: { __typename?: 'PostPageInfo', startCursor?: string | null, endCursor?: string | null, hasPreviousPage: boolean, hasNextPage: boolean } } };
 
 export type SignedUrlQueryVariables = Exact<{
   filename: Scalars['String'];
@@ -292,7 +322,7 @@ export const BasicPostFragmentFragmentDoc = gql`
       small
     }
   }
-  creator {
+  author {
     id
     username
   }

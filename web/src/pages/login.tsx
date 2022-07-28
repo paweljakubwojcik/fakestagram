@@ -32,7 +32,9 @@ const Login: NextPage = () => {
       await login({
         variables: values,
       })
-    } catch (e) {}
+    } catch (e) {
+      console.log(e)
+    }
   }
 
   return (

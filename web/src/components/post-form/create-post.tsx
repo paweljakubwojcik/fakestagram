@@ -4,7 +4,7 @@ import Head from "next/head"
 import { Modal } from "components/modal"
 import { MultiStepForm, MultiStepFormProps } from "components/multistep-form"
 import { useCreatePostApi } from "hooks/use-create-post-api"
-import { isEmpty, pick } from "ramda"
+import { equals, isEmpty, pick } from "ramda"
 import { ComponentProps, ComponentPropsWithoutRef, FC, useEffect, useReducer } from "react"
 import { ImageCrop } from "./image-crop/image-crop"
 import { PostMetaForm, PostMetaFormPanel } from "./post-meta-form"
@@ -31,11 +31,17 @@ const stepsReducer = (state: STEP, action: StepAction) => {
 }
 
 export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, open, ...props }) => {
-    const { images, aspectRatio, description } = usePostState(pick(["images", "aspectRatio", "description"]))
+    const { images, aspectRatio } = usePostState(pick(["images", "aspectRatio"]), equals)
+    const description = usePostState(
+        (state) => state.description,
+        () => true
+    )
     const clear = usePostState((state) => state.clear)
     const addImages = usePostState((state) => state.add)
     const cropImages = usePostState((state) => state.cropImages)
     const clearCroppedImages = usePostState((state) => state.clearCroppedImages)
+
+    console.log("render rere")
 
     const handleAddFiles = async (files: File[]) => {
         await addImages(files)

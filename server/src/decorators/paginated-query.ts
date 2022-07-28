@@ -9,18 +9,23 @@ import {
   ArgsType,
   createParamDecorator,
   Field,
+  FieldResolver,
   ID,
   ObjectType,
   Query,
 } from "type-graphql"
 import { AdvancedOptions } from "type-graphql/dist/decorators/types"
 
-// const typeMap = {}
+const typeMap = new Map<string, ClassType<RelayResponse<any>>>([]) // so one type is created only once
 export function createConnection<T>(
   TItemClass: ClassType<T>
 ): ClassType<RelayResponse<T>> {
   const { name } = TItemClass
+  const connectionName = `${name}Connection`
 
+  if (typeMap.has(connectionName)) {
+    return typeMap.get(connectionName)!
+  }
   @ObjectType({ isAbstract: true })
   class Edge implements IEdge<T> {
     public name = `${name}Edge`
@@ -46,9 +51,9 @@ export function createConnection<T>(
     public hasNextPage: boolean
   }
 
-  @ObjectType(`${name}Connection`, { isAbstract: true })
+  @ObjectType(connectionName, { isAbstract: true })
   class Connection implements RelayResponse<T> {
-    public name = `${name}Connection`
+    public name = connectionName
 
     @Field(() => [Edge])
     public edges!: IEdge<T>[]
@@ -57,6 +62,7 @@ export function createConnection<T>(
     public pageInfo!: PageInfo
   }
 
+  typeMap.set(connectionName, Connection)
   return Connection
 }
 
@@ -97,4 +103,12 @@ export function PaginatedQuery<T>(
 ): MethodDecorator {
   const RelayResponse = createConnection(TItemClass)
   return Query(() => RelayResponse, options)
+}
+
+export function PaginatedFieldResolver<T>(
+  TItemClass: ClassType<T>,
+  options?: AdvancedOptions
+): MethodDecorator {
+  const RelayResponse = createConnection(TItemClass)
+  return FieldResolver(() => RelayResponse, options)
 }

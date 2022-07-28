@@ -4,6 +4,7 @@ import { Image } from "src/entities/image"
 import { Like } from "src/entities/like"
 import { Post } from "src/entities/post"
 import { User } from "src/entities/user"
+import { PostSort } from "src/enums/post-sort"
 import { getRelayResult, RelayPaginationArgs } from "src/helpers/pagination"
 import { isAuth } from "src/middleware/is-auth"
 import { MyContext } from "src/types/context"
@@ -18,7 +19,6 @@ import {
   ID,
   Mutation,
   Query,
-  registerEnumType,
   Resolver,
   Root,
   UseMiddleware,
@@ -40,14 +40,6 @@ class UpdatePostInput implements Partial<Post> {
   @Field({ nullable: true })
   description?: string
 }
-
-enum PostSort {
-  createdAt = "createdAt",
-  updatedAt = "updatedAt",
-  id = "id",
-  title = "title",
-}
-registerEnumType(PostSort, { name: "PostSort" })
 
 @Resolver(() => Post)
 export class PostResolver {
@@ -76,7 +68,7 @@ export class PostResolver {
   ): Promise<Post> {
     const post = em.create(Post, {
       ...postData,
-      creator: em.getReference(User, req.session.userId!),
+      author: em.getReference(User, req.session.userId!),
     })
     await em.persistAndFlush(post)
     return post
@@ -147,8 +139,8 @@ export class PostResolver {
   }
 
   @FieldResolver()
-  async creator(@Root() post: Post, @Ctx() { em }: MyContext) {
-    return await em.findOne(User, { id: post.creator.id })
+  async author(@Root() post: Post, @Ctx() { em }: MyContext) {
+    return await em.findOne(User, { id: post.author.id })
   }
 
   @FieldResolver()
@@ -158,9 +150,7 @@ export class PostResolver {
 
   @FieldResolver(() => [Like])
   async likes(@Root() post: Post, @Ctx() { em }: MyContext) {
-    console.log(post)
     await em.populate(post, ["likes.user"])
-    console.log(post)
     return post.likes
   }
 

@@ -1,6 +1,7 @@
 overwrite: true
 schema: "../server/schema.gql"
 documents: "src/lib/graphql/**/*.graphql"
+watch: true
 generates:
   src/lib/generated/graphql.tsx:
     plugins:

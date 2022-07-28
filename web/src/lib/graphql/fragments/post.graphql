@@ -13,7 +13,7 @@ fragment BasicPostFragment on Post {
       small
     }
   }
-  creator {
+  author {
     id
     username
   }

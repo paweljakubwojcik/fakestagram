@@ -31,6 +31,7 @@ export const PostMetaForm: FC<PostMetaFormProps> = ({ className }) => {
 
 export const PostMetaFormPanel = () => {
     const { me } = useAuth()
+    console.log("render")
     const setDescription = usePostState((state) => state.setDescription)
 
     return (

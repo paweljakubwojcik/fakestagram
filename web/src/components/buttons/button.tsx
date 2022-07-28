@@ -13,6 +13,11 @@ const Loader = () => (
   <div className="block w-[1em] h-[1em] rounded-full border-2 border-t-transparent animate-spin mx-2" />
 )
 
+// const mergeTailwindClasses = (...classes: string[]): string => {
+//     const allClassesString = classes.reduce((acc, elem) => `${acc} ${elem}`, "")
+//     const classesSet = allClassesString.split(" ")
+// }
+
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, baseClassName, children, mode = "default", loading, ...props }, ref) => {
     return (
@@ -21,7 +26,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         className={classnames(
           baseClassName,
-          mode !== "default" && `relative overflow-visible before:rounded before:bg-insta-gradient before:absolute before:w-full before:h-full`,
+          mode !== "default" && `relative overflow-visible before:rounded before:bg-insta-gradient before:absolute before:w-full before:h-full `,
           mode === "secondary" && "before:transition-opacity before:opacity-0 before:hover:opacity-100"
         )}
       >

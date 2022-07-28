@@ -1,6 +1,7 @@
 import {
   Collection,
   Entity,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   Property,
@@ -19,10 +20,16 @@ export class Post extends BaseEntity {
 
   @Field()
   @ManyToOne()
-  readonly creator: User
+  readonly author: User
 
-  @OneToMany(() => Like, "post")
-  likes = new Collection<Like>(this)
+  @ManyToMany(() => User, "liked", {
+    pivotEntity: () => Like,
+    owner: true,
+  })
+  likes = new Collection<User>(this)
+
+  @ManyToMany(() => User, "saved")
+  savedBy = new Collection<User>(this)
 
   @Field(() => [Image])
   @OneToMany(() => Image, "post")

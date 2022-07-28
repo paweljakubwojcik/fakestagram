@@ -35,17 +35,19 @@ type Like {
 type Mutation {
   createPost(aspectRatio: String!, description: String!, images: [String!]!): Post!
   deletePost(id: String!): Boolean!
+  follow(userId: String!): User!
   likeOrDislikePost(like: Boolean!, post: String!): Post!
   login(credentials: Credentials!): User!
   logout: Boolean!
   register(credentials: Credentials!): User!
+  unFollow(userId: String!): User!
   updatePost(description: String, id: String!): Post
 }
 
 type Post {
   aspectRatio: String!
+  author: User!
   createdAt: DateTime!
-  creator: User!
   description: String!
   id: String!
   images: [Image!]!
@@ -81,6 +83,9 @@ type Query {
   posts(after: ID, before: ID, first: Int, last: Int, order: SortDir = ASC, sort: PostSort = createdAt): PostConnection!
   signedUrl(filename: String!): String!
   signedUrls(filenames: [String!]!): [String!]!
+
+  """User public info"""
+  user(username: String!): User!
 }
 
 """Order of sorting"""
@@ -98,8 +103,10 @@ type UrlSet {
 
 type User {
   createdAt: DateTime!
+  followers: [User!]!
+  following: [User!]!
   id: String!
-  posts: [Post!]!
+  posts(after: ID, before: ID, first: Int, last: Int, order: SortDir = ASC, sort: PostSort = createdAt): PostConnection!
   updatedAt: DateTime!
   username: String!
 }

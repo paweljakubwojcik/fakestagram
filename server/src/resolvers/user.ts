@@ -1,4 +1,20 @@
+import {
+  credentials,
+  type CredentialsType,
+} from "@fakestagram/common/validators"
+import { ApolloError, UserInputError } from "apollo-server-core"
+import argon2 from "argon2"
+import { COOKIE_NAME } from "src/constants"
+import {
+  PaginatedFieldResolver,
+  RelayArgs,
+} from "src/decorators/paginated-query"
+import { ValidateArg } from "src/decorators/validate"
+import { Post } from "src/entities/post"
 import { User } from "src/entities/user"
+import { PostSort } from "src/enums/post-sort"
+import { getRelayResult, RelayPaginationArgs } from "src/helpers/pagination"
+import { isAuth } from "src/middleware/is-auth"
 import { MyContext } from "src/types/context"
 import {
   Arg,
@@ -12,16 +28,6 @@ import {
   Root,
   UseMiddleware,
 } from "type-graphql"
-import argon2 from "argon2"
-import { ApolloError, UserInputError } from "apollo-server-core"
-import { isAuth } from "src/middleware/is-auth"
-import { Post } from "src/entities/post"
-import { ValidateArg } from "src/decorators/validate"
-import {
-  credentials,
-  type CredentialsType,
-} from "@fakestagram/common/validators"
-import { COOKIE_NAME } from "src/constants"
 
 @InputType()
 class Credentials implements CredentialsType {
@@ -76,8 +82,26 @@ export class UserResolver {
     if (!isValid) {
       throw new ApolloError("Incorrect credentials", "INVALID_CREDENTIALS")
     }
-
     req.session.userId = user.id
+    return user
+  }
+
+  @Query(() => User, {
+    description: "User public info",
+  })
+  async user(
+    @Ctx() { req, em }: MyContext,
+    @Arg("username") username: string
+  ): Promise<User> {
+    const user = await em.findOne(User, { username }, { populate: false })
+
+    if (!user) {
+      throw new ApolloError("No user with given username", "USER_NOT_FOUND")
+    }
+
+    const isMe = req.session.userId === user?.id
+
+    await em.populate([user], ["followers", "following"])
 
     return user
   }
@@ -107,8 +131,79 @@ export class UserResolver {
     })
   }
 
-  @FieldResolver()
-  async posts(@Root() user: User, @Ctx() { em }: MyContext) {
-    return await em.find(Post, { creator: em.getReference(User, user.id) })
+  @UseMiddleware(isAuth)
+  @Mutation(() => User)
+  async follow(@Ctx() { req, em }: MyContext, @Arg("userId") id: string) {
+    const userId = req.session.userId!
+    if (id === userId) {
+      return new ApolloError(
+        "You cannot follow yourself",
+        "CANNOT_FOLLOW_YOURSELF"
+      )
+    }
+
+    const user = await em.findOne(
+      User,
+      { id: userId },
+      { populate: ["following"] }
+    )
+    if (!user) {
+      throw new Error()
+    }
+
+    const userToFollow = em.getReference(User, id)
+    if (user.following.contains(userToFollow)) {
+      return new ApolloError(
+        "You already are following this user",
+        "USER_ALREADY_FOLLOWED"
+      )
+    }
+    user.following.add(userToFollow)
+    await em.persistAndFlush(user)
+    return user
+  }
+
+  @UseMiddleware(isAuth)
+  @Mutation(() => User)
+  async unFollow(@Ctx() { req, em }: MyContext, @Arg("userId") id: string) {
+    const userId = req.session.userId!
+    const user = await em.findOne(User, { id: userId }, {})
+    if (!user) {
+      throw new Error("This account does not exist or have been removed")
+    }
+
+    const userToUnFollow = em.getReference(User, id)
+    await userToUnFollow.followers?.init()
+    await user.following?.init()
+    userToUnFollow.followers?.remove(user)
+    user.following?.remove(userToUnFollow)
+    await em.persistAndFlush([user, userToUnFollow])
+    return user
+  }
+
+  @PaginatedFieldResolver(Post)
+  async posts(
+    @Root() user: User,
+    @Ctx() { em }: MyContext,
+    @RelayArgs(PostSort) paginationArgs: RelayPaginationArgs<PostSort>
+  ) {
+    const Query = em
+      .qb(Post)
+      .select(["*"])
+      .where({ author: em.getReference(User, user.id) })
+    return getRelayResult(Query, paginationArgs)
+  }
+
+  // TODO: paginate this
+  @FieldResolver(() => [User])
+  async followers(@Root() user: User, @Ctx() { em }: MyContext) {
+    await em.populate(user, ["followers"], {})
+    return user.followers
+  }
+
+  @FieldResolver(() => [User])
+  async following(@Root() user: User, @Ctx() { em }: MyContext) {
+    await em.populate(user, ["following"], {})
+    return user.following
   }
 }
