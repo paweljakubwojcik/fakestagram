@@ -66,6 +66,9 @@ export function createConnection<T>(
   return Connection
 }
 
+/**
+ * @deprecated 
+ */
 export const RelayArgs = (
   Sort: object = DefaultRelaySort
 ): ParameterDecorator => {

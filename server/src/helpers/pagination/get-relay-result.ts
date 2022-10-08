@@ -5,6 +5,9 @@ import { RelayResponse } from "src/types/relay-pagination"
 import { DefaultRelaySort } from "./default-relay-sort"
 import { RelayPaginationArgs, SortDir } from "./relay-pagination-args"
 
+/**
+ * @deprecated  
+ */
 export const getRelayResult = async <
   T extends BaseEntity,
   S extends string = DefaultRelaySort

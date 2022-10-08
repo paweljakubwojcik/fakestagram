@@ -3,71 +3,70 @@
 @tailwind utilities;
 
 @layer base {
-  input {
-    @apply autofill:bg-none;
-  }
+    input {
+        @apply autofill:bg-none;
+    }
 
-  html {
-    --instagradient: linear-gradient(#6559ca, #bc318f 30%, #e33f5f 50%, #f77638 70%, #fec66d 100%);
-  }
+    html {
+        --instagradient: linear-gradient(#6559ca, #bc318f 30%, #e33f5f 50%, #f77638 70%, #fec66d 100%);
+    }
 
-  body {
-    color: black;
+    body {
+        color: black;
 
-    @apply dark:text-white bg-gray-50 dark:bg-gray-900;
-  }
-
+        @apply dark:text-white bg-gray-50 dark:bg-gray-900;
+    }
 }
 
 @layer utilities {
-  .bg-insta-gradient {
-    background-image: radial-gradient(circle farthest-corner at 35% 90%, #fec564, transparent 50%),
-      radial-gradient(circle farthest-corner at 0 140%, #fec564, transparent 50%),
-      radial-gradient(ellipse farthest-corner at 0 -25%, #5258cf, transparent 50%),
-      radial-gradient(ellipse farthest-corner at 20% -50%, #5258cf, transparent 50%),
-      radial-gradient(ellipse farthest-corner at 100% 0, #893dc2, transparent 50%),
-      radial-gradient(ellipse farthest-corner at 60% -20%, #893dc2, transparent 50%),
-      radial-gradient(ellipse farthest-corner at 100% 100%, #d9317a, transparent),
-      linear-gradient(#6559ca, #bc318f 30%, #e33f5f 50%, #f77638 70%, #fec66d 100%);
-  }
-
-  .bg-image-black {
-    background-image: linear-gradient(#000000, #000);
-    transition: background-image 0.3s;
-  }
-
-  .insta-gradient-2 {
-    background: linear-gradient(#6559ca, #bc318f 30%, #e33f5f 50%, #f77638 70%, #fec66d 100%);
-  }
-
-  @keyframes appear {
-    from {
-      opacity: 0;
-      transform: scale(1.5);
+    .bg-insta-gradient {
+        background-image: radial-gradient(circle farthest-corner at 35% 90%, #fec564, transparent 50%),
+            radial-gradient(circle farthest-corner at 0 140%, #fec564, transparent 50%),
+            radial-gradient(ellipse farthest-corner at 0 -25%, #5258cf, transparent 50%),
+            radial-gradient(ellipse farthest-corner at 20% -50%, #5258cf, transparent 50%),
+            radial-gradient(ellipse farthest-corner at 100% 0, #893dc2, transparent 50%),
+            radial-gradient(ellipse farthest-corner at 60% -20%, #893dc2, transparent 50%),
+            radial-gradient(ellipse farthest-corner at 100% 100%, #d9317a, transparent),
+            linear-gradient(#6559ca, #bc318f 30%, #e33f5f 50%, #f77638 70%, #fec66d 100%);
     }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-  .animate-appear {
-    animation: appear 0.1s linear;
-  }
 
-  @keyframes opacity {
-    from {
-      opacity: 0;
+    .bg-image-black {
+        background-image: linear-gradient(#000000, #000);
+        transition: background-image 0.3s;
     }
-    to {
-      opacity: 1;
-    }
-  }
-  .animate-opacity {
-    animation: opacity 0.2s linear;
-  }
 
-  .error-text {
-    @apply text-rose-700;
-    @apply dark:text-rose-400;
-  }
+    .insta-gradient-2 {
+        background: linear-gradient(#6559ca, #bc318f 30%, #e33f5f 50%, #f77638 70%, #fec66d 100%);
+    }
+
+    @keyframes appear {
+        from {
+            opacity: 0;
+            transform: scale(1.5);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+    .animate-appear {
+        animation: appear 0.1s linear;
+    }
+
+    @keyframes opacity {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+    .animate-opacity {
+        animation: opacity 0.2s linear;
+    }
+
+    .error-text {
+        @apply text-rose-700;
+        @apply dark:text-rose-400;
+    }
 }

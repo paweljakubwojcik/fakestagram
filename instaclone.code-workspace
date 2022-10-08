@@ -8,11 +8,34 @@
 		},
 		{
 			"path": "common"
+		},
+		{
+			"path": "mobile-app"
 		}
 	],
 	"settings": {
 		"cSpell.words": [
 			"fakestagram"
-		]
+		],
+		"workbench.colorCustomizations": {
+			"activityBar.activeBackground": "#d14fa7",
+			"activityBar.background": "#d14fa7",
+			"activityBar.foreground": "#e7e7e7",
+			"activityBar.inactiveForeground": "#e7e7e799",
+			"activityBarBadge.background": "#9aca35",
+			"activityBarBadge.foreground": "#15202b",
+			"commandCenter.border": "#e7e7e799",
+			"sash.hoverBorder": "#d14fa7",
+			"statusBar.background": "#bc318f",
+			"statusBar.foreground": "#e7e7e7",
+			"statusBarItem.hoverBackground": "#d14fa7",
+			"statusBarItem.remoteBackground": "#bc318f",
+			"statusBarItem.remoteForeground": "#e7e7e7",
+			"titleBar.activeBackground": "#bc318f",
+			"titleBar.activeForeground": "#e7e7e7",
+			"titleBar.inactiveBackground": "#bc318f99",
+			"titleBar.inactiveForeground": "#e7e7e799"
+		},
+		"peacock.remoteColor": "#bc318f"
 	}
 }

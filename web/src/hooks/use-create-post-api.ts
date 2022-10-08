@@ -32,7 +32,7 @@ export const useCreatePostApi = () => {
     }
     await asyncForEach(data.signedUrls, async (url, i) => {
       const blobData = await fetch(Object.values(images)[i].croppedUrl!).then((res) => res.blob())
-      const fileData = new File([blobData], "asasdasd", { type: "image/jpeg" })
+      const fileData = new File([blobData], "this name does not  matter at all", { type: "image/jpeg" })
 
       const data = new FormData()
       data.append("file", fileData)

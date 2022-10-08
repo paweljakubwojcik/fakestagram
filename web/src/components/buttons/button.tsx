@@ -13,11 +13,6 @@ const Loader = () => (
   <div className="block w-[1em] h-[1em] rounded-full border-2 border-t-transparent animate-spin mx-2" />
 )
 
-// const mergeTailwindClasses = (...classes: string[]): string => {
-//     const allClassesString = classes.reduce((acc, elem) => `${acc} ${elem}`, "")
-//     const classesSet = allClassesString.split(" ")
-// }
-
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, baseClassName, children, mode = "default", loading, ...props }, ref) => {
     return (
