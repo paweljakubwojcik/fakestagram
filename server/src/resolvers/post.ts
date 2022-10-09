@@ -1,14 +1,14 @@
 import { ApolloError, UserInputError } from "apollo-server-core"
-import { PaginatedQuery, RelayArgs } from "src/decorators/paginated-query"
 import { Image } from "src/entities/image"
 import { Like } from "src/entities/like"
 import { Post } from "src/entities/post"
 import { User } from "src/entities/user"
-import { PostSort } from "src/enums/post-sort"
-import { getRelayResult, RelayPaginationArgs } from "src/helpers/pagination"
+import { PaginationArgs } from "src/helpers/pagination/pagination-args"
+import { createPaginatedResult } from "src/helpers/pagination/get-paginated-result-type"
+import { getPaginatedResults } from "src/helpers/pagination/get-paginated-results"
 import { isAuth } from "src/middleware/is-auth"
 import { MyContext } from "src/types/context"
-import { RelayResponse } from "src/types/relay-pagination"
+import { PaginatedResponse } from "src/types/paginated-response"
 import {
     Arg,
     Args,
@@ -19,6 +19,7 @@ import {
     ID,
     Mutation,
     Query,
+    registerEnumType,
     Resolver,
     Root,
     UseMiddleware,
@@ -41,6 +42,19 @@ class UpdatePostInput implements Partial<Post> {
     description?: string
 }
 
+enum PostSort {
+    createdAt = "createdAt",
+    updatedAt = "updatedAt",
+    id = "id",
+    likeCount = "likeCount",
+}
+registerEnumType(PostSort, { name: "PostSort" })
+
+@ArgsType()
+class PostsArgsInput extends PaginationArgs {
+    sort: PostSort
+}
+
 @Resolver(() => Post)
 export class PostResolver {
     @Query(() => Post, { nullable: true })
@@ -51,13 +65,17 @@ export class PostResolver {
         return em.findOne(Post, { id })
     }
 
-    @PaginatedQuery(Post)
+    @Query(() => createPaginatedResult(Post))
     async posts(
         @Ctx() { em }: MyContext,
-        @RelayArgs(PostSort) paginationArgs: RelayPaginationArgs<PostSort>
-    ): Promise<RelayResponse<Post>> {
-        const Query = em.qb(Post).select(["*"])
-        return getRelayResult(Query, paginationArgs)
+        @Args() { order, cursor, limit, sort }: PostsArgsInput
+    ): Promise<PaginatedResponse<Post>> {
+        return getPaginatedResults(em.qb(Post).select(["*"]), {
+            order,
+            cursor,
+            limit,
+            sort,
+        })
     }
 
     @Mutation(() => Post)
@@ -154,7 +172,7 @@ export class PostResolver {
 
     @FieldResolver(() => [Like])
     async likes(@Root() post: Post, @Ctx() { em }: MyContext) {
-        await em.populate(post, ["likes.user"])
+        await em.populate(post, ["likes"])
         return post.likes
     }
 
