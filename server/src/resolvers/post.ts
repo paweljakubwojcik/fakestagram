@@ -52,8 +52,11 @@ registerEnumType(PostSort, { name: "PostSort" })
 
 @ArgsType()
 class PostsArgsInput extends PaginationArgs {
-    sort: PostSort
+    @Field(() => PostSort, { nullable: true })
+    sort: PostSort = PostSort.createdAt
 }
+
+const PostsResponse = createPaginatedResult(Post)
 
 @Resolver(() => Post)
 export class PostResolver {
@@ -65,10 +68,10 @@ export class PostResolver {
         return em.findOne(Post, { id })
     }
 
-    @Query(() => createPaginatedResult(Post))
+    @Query(() => PostsResponse)
     async posts(
         @Ctx() { em }: MyContext,
-        @Args() { order, cursor, limit, sort }: PostsArgsInput
+        @Args(() => PostsArgsInput) { order, cursor, limit, sort }: PostsArgsInput
     ): Promise<PaginatedResponse<Post>> {
         return getPaginatedResults(em.qb(Post).select(["*"]), {
             order,

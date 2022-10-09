@@ -24,4 +24,4 @@ export default {
     debug: !__prod__,
     type: 'postgresql',
     loadStrategy: LoadStrategy.JOINED,
-} as Options<AbstractSqlDriver<AbstractSqlConnection>>
+} as Options

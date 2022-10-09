@@ -13,11 +13,6 @@ The javascript `Date` as string. Type represents date and time as the ISO Date s
 """
 scalar DateTime
 
-type Edge {
-  cursor: String
-  node: Post!
-}
-
 type Image {
   createdAt: DateTime!
   id: String!
@@ -58,21 +53,19 @@ type Post {
 }
 
 type PostConnection {
-  edges: [Edge!]!
+  list: [Post!]!
   pageInfo: PostPageInfo!
 }
 
 type PostPageInfo {
-  endCursor: ID
+  cursor: ID
   hasNextPage: Boolean!
-  hasPreviousPage: Boolean!
-  startCursor: ID
 }
 
 enum PostSort {
   createdAt
   id
-  title
+  likeCount
   updatedAt
 }
 
@@ -80,7 +73,7 @@ type Query {
   isUsernameAvailable(username: String!): Boolean!
   me: User
   post(id: ID!): Post
-  posts(after: ID, before: ID, first: Int, last: Int, order: SortDir = ASC, sort: PostSort = createdAt): PostConnection!
+  posts(cursor: ID, limit: Int, order: SortDir = ASC, sort: PostSort = createdAt): PostConnection!
   signedUrl(filename: String!): String!
   signedUrls(filenames: [String!]!): [String!]!
 
@@ -106,7 +99,7 @@ type User {
   followers: [User!]!
   following: [User!]!
   id: String!
-  posts(after: ID, before: ID, first: Int, last: Int, order: SortDir = ASC, sort: PostSort = createdAt): PostConnection!
+  posts(cursor: ID, limit: Int, order: SortDir = ASC, sort: String = "createdAt"): PostConnection!
   updatedAt: DateTime!
   username: String!
 }

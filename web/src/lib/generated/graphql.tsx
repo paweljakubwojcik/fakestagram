@@ -22,12 +22,6 @@ export type Credentials = {
   username: Scalars['String'];
 };
 
-export type Edge = {
-  __typename?: 'Edge';
-  cursor?: Maybe<Scalars['String']>;
-  node: Post;
-};
-
 export type Image = {
   __typename?: 'Image';
   createdAt: Scalars['DateTime'];
@@ -117,22 +111,20 @@ export type Post = {
 
 export type PostConnection = {
   __typename?: 'PostConnection';
-  edges: Array<Edge>;
+  list: Array<Post>;
   pageInfo: PostPageInfo;
 };
 
 export type PostPageInfo = {
   __typename?: 'PostPageInfo';
-  endCursor?: Maybe<Scalars['ID']>;
+  cursor?: Maybe<Scalars['ID']>;
   hasNextPage: Scalars['Boolean'];
-  hasPreviousPage: Scalars['Boolean'];
-  startCursor?: Maybe<Scalars['ID']>;
 };
 
 export enum PostSort {
   CreatedAt = 'createdAt',
   Id = 'id',
-  Title = 'title',
+  LikeCount = 'likeCount',
   UpdatedAt = 'updatedAt'
 }
 
@@ -160,10 +152,8 @@ export type QueryPostArgs = {
 
 
 export type QueryPostsArgs = {
-  after?: InputMaybe<Scalars['ID']>;
-  before?: InputMaybe<Scalars['ID']>;
-  first?: InputMaybe<Scalars['Int']>;
-  last?: InputMaybe<Scalars['Int']>;
+  cursor?: InputMaybe<Scalars['ID']>;
+  limit?: InputMaybe<Scalars['Int']>;
   order?: InputMaybe<SortDir>;
   sort?: InputMaybe<PostSort>;
 };
@@ -201,6 +191,7 @@ export type User = {
   __typename?: 'User';
   createdAt: Scalars['DateTime'];
   followers: Array<User>;
+  following: Array<User>;
   id: Scalars['String'];
   posts: PostConnection;
   updatedAt: Scalars['DateTime'];
@@ -209,12 +200,10 @@ export type User = {
 
 
 export type UserPostsArgs = {
-  after?: InputMaybe<Scalars['ID']>;
-  before?: InputMaybe<Scalars['ID']>;
-  first?: InputMaybe<Scalars['Int']>;
-  last?: InputMaybe<Scalars['Int']>;
+  cursor?: InputMaybe<Scalars['ID']>;
+  limit?: InputMaybe<Scalars['Int']>;
   order?: InputMaybe<SortDir>;
-  sort?: InputMaybe<PostSort>;
+  sort?: InputMaybe<Scalars['String']>;
 };
 
 export type LikesFragment = { __typename?: 'Post', id: string, likedByMe: boolean, likeCount: number };
@@ -274,16 +263,14 @@ export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', username: string, id: string } | null };
 
 export type PostsQueryVariables = Exact<{
-  last?: InputMaybe<Scalars['Int']>;
-  before?: InputMaybe<Scalars['ID']>;
-  first?: InputMaybe<Scalars['Int']>;
-  after?: InputMaybe<Scalars['ID']>;
+  limit?: InputMaybe<Scalars['Int']>;
+  cursor?: InputMaybe<Scalars['ID']>;
   sort?: InputMaybe<PostSort>;
   order?: InputMaybe<SortDir>;
 }>;
 
 
-export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PostConnection', edges: Array<{ __typename?: 'Edge', cursor?: string | null, node: { __typename?: 'Post', id: string, createdAt: any, updatedAt: any, description: string, aspectRatio: string, likedByMe: boolean, likeCount: number, images: Array<{ __typename?: 'Image', id: string, url: { __typename?: 'UrlSet', original: string, small: string } }>, author: { __typename?: 'User', id: string, username: string } } }>, pageInfo: { __typename?: 'PostPageInfo', startCursor?: string | null, endCursor?: string | null, hasPreviousPage: boolean, hasNextPage: boolean } } };
+export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PostConnection', list: Array<{ __typename?: 'Post', id: string, createdAt: any, updatedAt: any, description: string, aspectRatio: string, likedByMe: boolean, likeCount: number, images: Array<{ __typename?: 'Image', id: string, url: { __typename?: 'UrlSet', original: string, small: string } }>, author: { __typename?: 'User', id: string, username: string } }>, pageInfo: { __typename?: 'PostPageInfo', cursor?: string | null, hasNextPage: boolean } } };
 
 export type SignedUrlQueryVariables = Exact<{
   filename: Scalars['String'];
@@ -573,25 +560,13 @@ export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
 export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
 export const PostsDocument = gql`
-    query Posts($last: Int, $before: ID, $first: Int, $after: ID, $sort: PostSort, $order: SortDir) {
-  posts(
-    last: $last
-    before: $before
-    first: $first
-    after: $after
-    sort: $sort
-    order: $order
-  ) {
-    edges {
-      cursor
-      node {
-        ...BasicPostFragment
-      }
+    query Posts($limit: Int, $cursor: ID, $sort: PostSort, $order: SortDir) {
+  posts(limit: $limit, cursor: $cursor, sort: $sort, order: $order) {
+    list {
+      ...BasicPostFragment
     }
     pageInfo {
-      startCursor
-      endCursor
-      hasPreviousPage
+      cursor
       hasNextPage
     }
   }
@@ -610,10 +585,8 @@ export const PostsDocument = gql`
  * @example
  * const { data, loading, error } = usePostsQuery({
  *   variables: {
- *      last: // value for 'last'
- *      before: // value for 'before'
- *      first: // value for 'first'
- *      after: // value for 'after'
+ *      limit: // value for 'limit'
+ *      cursor: // value for 'cursor'
  *      sort: // value for 'sort'
  *      order: // value for 'order'
  *   },

@@ -12,67 +12,57 @@ import micrOrmConfig from "./mikro-orm.config"
 import { resolvers } from "./resolvers/index"
 import { MyContext } from "./types/context"
 import cors from "cors"
-import { configureBucketCors } from "./lib/s3/get-upload-signed-url"
-
-
 ;(async () => {
+    const orm = await MikroORM.init(micrOrmConfig)
+    // apply migrations programmatically
+    // await orm.getMigrator().up()
 
+    const RedisStore = connectRedis(session)
+    const redisClient = createClient({ legacyMode: true })
+    redisClient
+        .connect()
+        .then(() => console.log("Redis connected"))
+        .catch(console.error)
 
-  const orm = await MikroORM.init<AbstractSqlDriver<AbstractSqlConnection>>(
-    micrOrmConfig
-  )
-  // apply migrations programmatically
-  // await orm.getMigrator().up()
+    const app = express()
 
-  const RedisStore = connectRedis(session)
-  const redisClient = createClient({ legacyMode: true })
-  redisClient
-    .connect()
-    .then(() => console.log("Redis connected"))
-    .catch(console.error)
+    app.use(
+        cors({
+            credentials: true,
+            origin: "http://localhost:3005",
+        })
+    )
 
-  const app = express()
+    app.use(
+        session({
+            name: COOKIE_NAME,
+            store: new RedisStore({
+                client: redisClient,
+                disableTouch: true,
+            }),
+            saveUninitialized: false,
+            secret: process.env.SESSION_SECRET!,
+            resave: false,
+            cookie: {
+                maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
+                httpOnly: true,
+                secure: __prod__, // https only
+                sameSite: "lax", // csrf
+                path: "/",
+            },
+        })
+    )
 
-  app.use(
-    cors({
-      credentials: true,
-      origin: "http://localhost:3005",
+    const apolloServer = new ApolloServer({
+        schema: await buildSchema({
+            resolvers,
+            emitSchemaFile: true,
+        }),
+        context: ({ req, res }): MyContext => ({ em: orm.em.fork(), req, res }),
     })
-  )
+    await apolloServer.start()
+    apolloServer.applyMiddleware({ app, cors: false })
 
-  app.use(
-    session({
-      name: COOKIE_NAME,
-      store: new RedisStore({
-        client: redisClient,
-        disableTouch: true,
-      }),
-      saveUninitialized: false,
-      secret: process.env.SESSION_SECRET!,
-      resave: false,
-      cookie: {
-        maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
-        httpOnly: true,
-        secure: __prod__, // https only
-        sameSite: "lax", // csrf
-        path: "/",
-      },
-    })
-  )
-
-  const apolloServer = new ApolloServer({
-    schema: await buildSchema({
-      resolvers,
-      emitSchemaFile: true,
-    }),
-    context: ({ req, res }): MyContext => ({ em: orm.em.fork(), req, res }),
-  })
-  await apolloServer.start()
-  apolloServer.applyMiddleware({ app, cors: false })
-
-  await new Promise<void>((resolve) => app.listen({ port: 4000 }, resolve))
-  console.log("server running on http://localhost:4000/graphql")
-
-  await configureBucketCors()
-
+    await new Promise<void>((resolve) => app.listen({ port: 4000 }, resolve))
+    console.log("server running on http://localhost:4000/graphql")
 })()

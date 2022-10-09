@@ -8,6 +8,7 @@ import { COOKIE_NAME } from "src/constants"
 import { ValidateArg } from "src/decorators/validate"
 import { Post } from "src/entities/post"
 import { User } from "src/entities/user"
+import { createPaginatedResult } from "src/helpers/pagination/get-paginated-result-type"
 import { getPaginatedResults } from "src/helpers/pagination/get-paginated-results"
 import { PaginationArgs } from "src/helpers/pagination/pagination-args"
 import { isAuth } from "src/middleware/is-auth"
@@ -34,6 +35,8 @@ class Credentials implements CredentialsType {
     @Field()
     password: string
 }
+
+const PostsResult = createPaginatedResult(Post)
 
 @Resolver(() => User)
 export class UserResolver {
@@ -187,6 +190,7 @@ export class UserResolver {
         return user
     }
 
+    @FieldResolver(() => PostsResult)
     async posts(
         @Root() user: User,
         @Ctx() { em }: MyContext,
