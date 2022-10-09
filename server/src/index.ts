@@ -1,7 +1,8 @@
 import { MikroORM } from "@mikro-orm/core"
-import { AbstractSqlConnection, AbstractSqlDriver } from "@mikro-orm/postgresql"
+import type { EntityManager } from "@mikro-orm/postgresql"
 import { ApolloServer } from "apollo-server-express"
 import connectRedis from "connect-redis"
+import cors from "cors"
 import express from "express"
 import session from "express-session"
 import "module-alias/register"
@@ -11,7 +12,7 @@ import { COOKIE_NAME, __prod__ } from "./constants"
 import micrOrmConfig from "./mikro-orm.config"
 import { resolvers } from "./resolvers/index"
 import { MyContext } from "./types/context"
-import cors from "cors"
+
 ;(async () => {
     const orm = await MikroORM.init(micrOrmConfig)
     // apply migrations programmatically
@@ -58,7 +59,11 @@ import cors from "cors"
             resolvers,
             emitSchemaFile: true,
         }),
-        context: ({ req, res }): MyContext => ({ em: orm.em.fork(), req, res }),
+        context: ({ req, res }): MyContext => ({
+            em: orm.em.fork() as EntityManager,
+            req,
+            res,
+        }),
     })
     await apolloServer.start()
     apolloServer.applyMiddleware({ app, cors: false })

@@ -1,4 +1,4 @@
-import type { EntityManager,  } from '@mikro-orm/postgresql'
+import type { EntityManager } from '@mikro-orm/postgresql'
 import { Request, Response } from 'express'
 
 export type MyContext = {

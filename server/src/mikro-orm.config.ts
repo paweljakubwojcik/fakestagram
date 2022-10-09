@@ -1,8 +1,6 @@
 import { __prod__ } from "./constants";
 import { LoadStrategy, Options } from "@mikro-orm/core";
 import path from "path";
-import { AbstractSqlConnection, AbstractSqlDriver } from "@mikro-orm/postgresql";
-
 
 export default {
     entities: ['./dist/entities'],
