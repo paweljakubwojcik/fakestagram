@@ -12,7 +12,7 @@ import micrOrmConfig from "./mikro-orm.config"
 import { resolvers } from "./resolvers/index"
 import { MyContext } from "./types/context"
 import cors from "cors"
-import { configureBucketCors } from "./lib/cloud-storage"
+import { configureBucketCors } from "./lib/s3/get-upload-signed-url"
 
 
 ;(async () => {

@@ -12,6 +12,9 @@ const validate = async (schema: AnySchema, args: ArgsDictionary) => {
   }
 }
 
+/**
+ * Decorator for validating args with yup schema 
+ */
 export function ValidateArgs(schema: AnySchema) {
   return createMethodDecorator(async ({ args }, next) => {
     await validate(schema, args)
@@ -19,10 +22,12 @@ export function ValidateArgs(schema: AnySchema) {
   })
 }
 
+/**
+ * Decorator for validating args with yup schema 
+ */
 export function ValidateArg(argName: string, schema: AnySchema) {
   return createMethodDecorator(async ({ args }, next) => {
     await validate(schema, args[argName])
-
     return next()
   })
 }
