@@ -1,12 +1,10 @@
-import { withApollo } from "lib/apollo"
+import { SortDir, usePostsQuery } from "@graphql"
+import { authPage } from "components/auth-page"
+import { List } from "components/list"
+import { Navbar } from "components/navbar"
+import { PostCard } from "components/post-card"
 import type { NextPage } from "next"
 import Head from "next/head"
-import { Navbar } from "components/navbar"
-import { authPage } from "components/auth-page"
-import { SortDir, usePostsQuery } from "@graphql"
-import { PostCard } from "components/post-card"
-import { Button } from "components/buttons"
-import { List } from "components/list"
 
 const PAGE_SIZE = 4
 
@@ -48,4 +46,4 @@ const Home: NextPage = () => {
     )
 }
 
-export default withApollo(authPage(Home))
+export default authPage(Home)

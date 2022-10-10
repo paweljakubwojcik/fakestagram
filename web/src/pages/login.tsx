@@ -1,16 +1,15 @@
+import { credentials, type CredentialsType } from "@fakestagram/common/validators"
+import { MeDocument, useLoginMutation } from "@graphql"
+import { Button } from "components/buttons"
+import { Card } from "components/card"
+import { ErrorBox } from "components/error-box"
+import { InputField } from "components/input-field"
+import { publicOnlyPage } from "components/public-only-page"
 import { Form, Formik, FormikConfig, FormikProps } from "formik"
 import type { NextPage } from "next"
 import Head from "next/head"
-import { Button } from "components/buttons"
-import { Card } from "components/card"
-import { InputField } from "components/input-field"
-import { withApollo } from "lib/apollo"
-import { MeDocument, useLoginMutation } from "@graphql"
-import { ErrorBox } from "components/error-box"
-import { credentials, type CredentialsType } from "@fakestagram/common/validators"
 import Link from "next/link"
 import { useRouter } from "next/router"
-import { publicOnlyPage } from "components/public-only-page"
 
 type LoginFormValues = CredentialsType
 
@@ -80,4 +79,4 @@ const Login: NextPage = () => {
   )
 }
 
-export default withApollo(publicOnlyPage(Login))
+export default publicOnlyPage(Login)

@@ -1,20 +1,20 @@
 fragment BasicPostFragment on Post {
-  id
-  createdAt
-  updatedAt
-  description
-  aspectRatio
-  likedByMe
-  likeCount
-  images {
     id
-    url {
-      original
-      small
+    createdAt
+    updatedAt
+    description
+    aspectRatio
+    likedByMe
+    likeCount
+    images {
+        id
+        url {
+            original
+            small
+        }
     }
-  }
-  author {
-    id
-    username
-  }
+    author {
+        id
+        username
+    }
 }

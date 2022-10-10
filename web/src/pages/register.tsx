@@ -1,17 +1,16 @@
+import { credentials } from "@fakestagram/common/validators"
+import { MeDocument, useRegisterMutation } from "@graphql"
+import { Button } from "components/buttons/button"
+import { Card } from "components/card"
+import { ErrorBox } from "components/error-box"
+import { InputField } from "components/input-field"
+import { publicOnlyPage } from "components/public-only-page"
 import { Form, Formik, FormikConfig, FormikProps } from "formik"
 import type { NextPage } from "next"
 import Head from "next/head"
-import { Button } from "components/buttons/button"
-import { Card } from "components/card"
-import { InputField } from "components/input-field"
-import { withApollo } from "lib/apollo"
-import { MeDocument, useRegisterMutation } from "@graphql"
-import { ErrorBox } from "components/error-box"
-import { credentials } from "@fakestagram/common/validators"
-import * as yup from "yup"
 import Link from "next/link"
 import { useRouter } from "next/router"
-import { publicOnlyPage } from "components/public-only-page"
+import * as yup from "yup"
 
 const registerValidation = credentials.shape({
   confirmPassword: yup
@@ -93,4 +92,4 @@ const Register: NextPage = () => {
   )
 }
 
-export default withApollo(publicOnlyPage(Register))
+export default publicOnlyPage(Register)

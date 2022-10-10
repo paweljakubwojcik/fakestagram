@@ -1,8 +1,7 @@
-import { withApollo } from "lib/apollo"
+import { authPage } from "components/auth-page"
+import { Navbar } from "components/navbar"
 import type { NextPage } from "next"
 import Head from "next/head"
-import { Navbar } from "components/navbar"
-import { authPage } from "components/auth-page"
 
 const Likes: NextPage = () => {
   return (
@@ -16,4 +15,4 @@ const Likes: NextPage = () => {
   )
 }
 
-export default withApollo(authPage(Likes))
+export default authPage(Likes)

@@ -1,10 +1,9 @@
-import { withApollo } from "lib/apollo"
+import { Navbar } from "components/navbar"
+import { SplashScreen } from "components/splash-screen"
+import { useAuth } from "hooks/use-auth"
 import type { NextPage } from "next"
 import Head from "next/head"
-import { Navbar } from "components/navbar"
 import { useRouter } from "next/router"
-import { useAuth } from "hooks/use-auth"
-import { SplashScreen } from "components/splash-screen"
 
 const Profile: NextPage = () => {
     const router = useRouter()
@@ -27,4 +26,4 @@ const Profile: NextPage = () => {
     )
 }
 
-export default withApollo(Profile)
+export default Profile
