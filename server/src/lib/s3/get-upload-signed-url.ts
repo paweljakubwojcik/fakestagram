@@ -1,19 +1,21 @@
-import { createPresignedPost } from "@aws-sdk/s3-presigned-post"
-import { BUCKET_NAME, s3 } from "./s3"
+import { PutObjectCommand } from "@aws-sdk/client-s3"
+import { BUCKET_NAME, s3 as s3Client } from "./s3"
+import { v4 as uuid } from "uuid"
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 
 type GenerateSignedUrlOptions = {
     filename: string
     contentType?: string
 }
 
-export async function getUploadSignedUrl({
-    filename,
-}: GenerateSignedUrlOptions) {
-    const { url } = await createPresignedPost(s3, {
+export function getUploadSignedUrl({ filename }: GenerateSignedUrlOptions): Promise<string> {
+    // Create a command to put the object in the S3 bucket.
+    const command = new PutObjectCommand({
         Bucket: BUCKET_NAME,
-        Key: `uploads/${filename}`,
-        Expires: Date.now() + 15 * 60 * 1000, // 15 minutes
+        Key: `${uuid()}_${filename}`,
     })
-
-    return url
+    // Create the presigned URL.
+    return getSignedUrl(s3Client as any, command as any, {
+        expiresIn: 3600,
+    })
 }

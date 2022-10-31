@@ -32,8 +32,7 @@ export function useIntersectionObserver<T extends HTMLElement>({
 
     return () => observer.disconnect()
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [elementRef, JSON.stringify(threshold), root, rootMargin, frozen])
+  }, [elementRef, root, rootMargin, frozen, threshold])
 
   return [elementRef, entry] as const
 }

@@ -5,18 +5,18 @@ import sloth from "public/sloth.jpg"
 import { UserFragmentFragment } from "@graphql"
 
 type AvatarProps = ComponentPropsWithoutRef<"div"> & {
-  user?: UserFragmentFragment
-  size?: number
+    user?: UserFragmentFragment
+    size?: number
 }
 
-export const Avatar: FC<AvatarProps> = ({ className, user,  size = 24 }) => {
-  return (
-    <Image
-      src={sloth}
-      alt={`${user?.username} profile image`}
-      width={size}
-      height={size}
-      className={classnames("rounded-full", className)}
-    />
-  )
+export const Avatar: FC<AvatarProps> = ({ className, user, size = 24 }) => {
+    return (
+        <Image
+            src={user?.profileImage || sloth}
+            alt={`${user?.username} profile image`}
+            width={size}
+            height={size}
+            className={classnames("rounded-full", className)}
+        />
+    )
 }

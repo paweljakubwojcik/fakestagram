@@ -11,7 +11,7 @@ export class SignedUrl {
 
     @UseMiddleware(isAuth)
     @Query(() => [String])
-    signedUrls(@Arg("filenames", () => [String]) filenames: string[]) {
-        return filenames.map((filename) => getUploadSignedUrl({ filename }))
+    async signedUrls(@Arg("filenames", () => [String]) filenames: string[]) {
+        return Promise.all(filenames.map((filename) => getUploadSignedUrl({ filename })))
     }
 }

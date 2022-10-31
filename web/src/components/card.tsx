@@ -14,7 +14,7 @@ export const Card: FC<CardProps> = forwardRef(
             component,
             {
                 className: classnames(
-                    "bg-white flex flex-col border rounded-sm m-3 dark:!border-gray-300/20 ",
+                    "bg-white flex flex-col border rounded m-3 dark:!border-gray-300/20 ",
                     light && "dark:bg-gray-800",
                     !light && "dark:bg-black",
                     className

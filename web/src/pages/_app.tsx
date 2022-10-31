@@ -17,7 +17,7 @@ function MyApp({ Component, pageProps }: AppPropsWithLayout) {
         <ApolloProvider client={apolloClient}>
             <Head>
                 <title>Fakestagram</title>
-                <meta name="description" content="fakestagram is a fake place for your photoshoped photos" />
+                <meta name="description" content="fakestagram is a fake place for your fake photos" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
             <GradientsProvider />

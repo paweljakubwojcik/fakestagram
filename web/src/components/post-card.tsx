@@ -2,6 +2,7 @@ import { BasicPostFragmentFragment, LikesFragmentDoc, useLikeOrDislikePostMutati
 import classnames from "classnames"
 import { formatDistanceToNow } from "date-fns"
 import Image from "next/image"
+import Link from "next/link"
 import { ComponentPropsWithoutRef, FC, useState } from "react"
 import { ArrowLeftCircle, ArrowRightCircle, Heart, MessageCircle, MoreHorizontal, Pocket, Send } from "react-feather"
 import { Avatar } from "./avatar"
@@ -43,10 +44,14 @@ export const PostCard: FC<PostCardProps> = ({ className, post }) => {
     const hasCarousel = images.length > 1
 
     return (
-        <Card className={classnames("flex-col flex text-base", className)}>
+        <Card className={classnames("flex-col flex text-base !rounded-md", className)}>
             <header className="flex items-center p-4">
-                <Avatar size={30} user={author} />
-                <div className="ml-2 text-md"> {author.username}</div>
+                <Link href={`/${author.username}`}>
+                    <a className="flex items-center">
+                        <Avatar size={30} user={author} />
+                        <div className="ml-2 text-md"> {author.username}</div>
+                    </a>
+                </Link>
                 <IconButton className="ml-auto">
                     <MoreHorizontal />
                 </IconButton>
@@ -131,6 +136,9 @@ export const PostCard: FC<PostCardProps> = ({ className, post }) => {
                     {description}
                 </div>
                 <div className="text-sm font-light">{formatDistanceToNow(new Date(createdAt))} ago</div>
+            </div>
+            <div>
+                <textarea />
             </div>
         </Card>
     )

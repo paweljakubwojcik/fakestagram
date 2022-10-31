@@ -32,16 +32,19 @@ export function paginatedPolicy<TNode extends BasicNode = BasicNode>(
         read(existing, { canRead }) {
             if (!existing) return
             const list = existing.list.filter((node) => canRead(node))
+            console.log({
+                // Some implementations return additional Connection fields, such
+                // as existing.totalCount. These fields are saved by the merge
+                // function, so the read function should also preserve them.
+                ...existing,
+                list,
+            })
             return {
                 // Some implementations return additional Connection fields, such
                 // as existing.totalCount. These fields are saved by the merge
                 // function, so the read function should also preserve them.
                 ...existing,
                 list,
-                pageInfo: {
-                    ...existing.pageInfo,
-                    cursor: getCursorId(list.at(-1)),
-                },
             }
         },
 
@@ -50,21 +53,29 @@ export function paginatedPolicy<TNode extends BasicNode = BasicNode>(
 
             const incomingEdges = incoming.list.slice(0) // copy array
 
+
+            // [1, 2, 3] + [3, 4, 5]
+            // [1, 2, 3] + [1, 2, 3]
+            // [1, 2, 3, 4, 5, 6] + [4, 5, 6]
+
             let prefix = existing.list
             if (args.cursor) {
                 const index = prefix.findIndex((node) => getCursorId(node) === args.cursor)
                 if (index >= 0) {
                     prefix = prefix.slice(0, index + 1)
-                    // suffix = []; // already true
                 }
             } else {
-                // If we have neither args.after nor args.before, the incoming
-                // edges cannot be spliced into the existing edges, so they must
-                // replace the existing edges. See #6592 for a motivating example.
                 prefix = []
             }
 
             const list = [...prefix, ...incomingEdges]
+
+            console.log({
+                ...existing,
+                ...incoming,
+                list,
+                pageInfo: incoming.pageInfo,
+            })
 
             return {
                 ...existing,

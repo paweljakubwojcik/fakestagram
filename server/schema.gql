@@ -16,6 +16,7 @@ scalar DateTime
 type Image {
   createdAt: DateTime!
   id: String!
+  originalUrl: String!
   post: Post!
   updatedAt: DateTime!
   url: UrlSet!
@@ -100,6 +101,7 @@ type User {
   following: [User!]!
   id: String!
   posts(cursor: ID, limit: Int, order: SortDir = ASC, sort: String = "createdAt"): PostConnection!
+  profileImage: String!
   updatedAt: DateTime!
   username: String!
 }

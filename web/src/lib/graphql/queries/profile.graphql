@@ -1,0 +1,17 @@
+query Profile($username: String!) {
+    user(username: $username) {
+        id
+        username
+        posts {
+            list {
+                id
+                images {
+                    id
+                    url {
+                        small
+                    }
+                }
+            }
+        }
+    }
+}

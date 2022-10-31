@@ -1,7 +1,4 @@
-import {
-  credentials,
-  type CredentialsType
-} from "@fakestagram/common/validators"
+import { credentials, type CredentialsType } from "@fakestagram/common/validators"
 import { ApolloError, UserInputError } from "apollo-server-core"
 import argon2 from "argon2"
 import { COOKIE_NAME } from "src/constants"
@@ -14,17 +11,17 @@ import { PaginationArgs } from "src/helpers/pagination/pagination-args"
 import { isAuth } from "src/middleware/is-auth"
 import { MyContext } from "src/types/context"
 import {
-  Arg,
-  Args,
-  Ctx,
-  Field,
-  FieldResolver,
-  InputType,
-  Mutation,
-  Query,
-  Resolver,
-  Root,
-  UseMiddleware
+    Arg,
+    Args,
+    Ctx,
+    Field,
+    FieldResolver,
+    InputType,
+    Mutation,
+    Query,
+    Resolver,
+    Root,
+    UseMiddleware,
 } from "type-graphql"
 
 @InputType()
@@ -37,6 +34,8 @@ class Credentials implements CredentialsType {
 }
 
 const PostsResult = createPaginatedResult(Post)
+
+const getUserInitialProfileImage = (username: string) => `https://robohash.org/${username}`
 
 @Resolver(() => User)
 export class UserResolver {
@@ -55,7 +54,11 @@ export class UserResolver {
     ): Promise<User> {
         const hashedPassword = await argon2.hash(password)
         try {
-            const user = em.create(User, { password: hashedPassword, username })
+            const user = em.create(User, {
+                password: hashedPassword,
+                username,
+                profileImage: getUserInitialProfileImage(username),
+            })
             await em.persistAndFlush(user)
             req.session.userId = user.id
 
@@ -76,17 +79,11 @@ export class UserResolver {
     ): Promise<User> {
         const user = await em.findOne(User, { username })
         if (!user) {
-            throw new ApolloError(
-                "Incorrect credentials",
-                "INVALID_CREDENTIALS"
-            )
+            throw new ApolloError("Incorrect credentials", "INVALID_CREDENTIALS")
         }
         const isValid = await argon2.verify(user.password, password)
         if (!isValid) {
-            throw new ApolloError(
-                "Incorrect credentials",
-                "INVALID_CREDENTIALS"
-            )
+            throw new ApolloError("Incorrect credentials", "INVALID_CREDENTIALS")
         }
         req.session.userId = user.id
         return user
@@ -95,20 +92,14 @@ export class UserResolver {
     @Query(() => User, {
         description: "User public info",
     })
-    async user(
-        @Ctx() { req, em }: MyContext,
-        @Arg("username") username: string
-    ): Promise<User> {
+    async user(@Ctx() { req, em }: MyContext, @Arg("username") username: string): Promise<User> {
         const user = await em.findOne(User, { username }, { populate: false })
 
         if (!user) {
-            throw new ApolloError(
-                "No user with given username",
-                "USER_NOT_FOUND"
-            )
+            throw new ApolloError("No user with given username", "USER_NOT_FOUND")
         }
 
-        const isMe = req.session.userId === user?.id
+        // const isMe = req.session.userId === user?.id
 
         await em.populate([user], ["followers", "following"])
 
@@ -116,10 +107,7 @@ export class UserResolver {
     }
 
     @Query(() => Boolean)
-    async isUsernameAvailable(
-        @Arg("username") username: string,
-        @Ctx() { em }: MyContext
-    ): Promise<Boolean> {
+    async isUsernameAvailable(@Arg("username") username: string, @Ctx() { em }: MyContext): Promise<Boolean> {
         const usernameCount = await em.count(User, { username })
         return usernameCount === 0
     }
@@ -145,27 +133,17 @@ export class UserResolver {
     async follow(@Ctx() { req, em }: MyContext, @Arg("userId") id: string) {
         const userId = req.session.userId!
         if (id === userId) {
-            return new ApolloError(
-                "You cannot follow yourself",
-                "CANNOT_FOLLOW_YOURSELF"
-            )
+            return new ApolloError("You cannot follow yourself", "CANNOT_FOLLOW_YOURSELF")
         }
 
-        const user = await em.findOne(
-            User,
-            { id: userId },
-            { populate: ["following"] }
-        )
+        const user = await em.findOne(User, { id: userId }, { populate: ["following"] })
         if (!user) {
             throw new Error()
         }
 
         const userToFollow = em.getReference(User, id)
         if (user.following.contains(userToFollow)) {
-            return new ApolloError(
-                "You already are following this user",
-                "USER_ALREADY_FOLLOWED"
-            )
+            return new ApolloError("You already are following this user", "USER_ALREADY_FOLLOWED")
         }
         user.following.add(userToFollow)
         await em.persistAndFlush(user)
@@ -191,11 +169,7 @@ export class UserResolver {
     }
 
     @FieldResolver(() => PostsResult)
-    async posts(
-        @Root() user: User,
-        @Ctx() { em }: MyContext,
-        @Args() paginationArgs: PaginationArgs
-    ) {
+    async posts(@Root() user: User, @Ctx() { em }: MyContext, @Args() paginationArgs: PaginationArgs) {
         const Query = em
             .qb(Post)
             .select(["*"])

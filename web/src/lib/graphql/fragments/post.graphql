@@ -16,5 +16,6 @@ fragment BasicPostFragment on Post {
     author {
         id
         username
+        profileImage
     }
 }

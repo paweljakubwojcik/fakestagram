@@ -41,8 +41,6 @@ export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, open, 
     const cropImages = usePostState((state) => state.cropImages)
     const clearCroppedImages = usePostState((state) => state.clearCroppedImages)
 
-    console.log("render rere")
-
     const handleAddFiles = async (files: File[]) => {
         await addImages(files)
         stepDispatch({ type: "SET", step: "CROPPING" })
@@ -60,7 +58,7 @@ export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, open, 
         }
     }, [images])
 
-    const [createPost, { loading }] = useCreatePostApi()
+    const [createPost, { loading, error }] = useCreatePostApi()
 
     const steps: MultiStepFormProps["steps"] = {
         UPLOADING: {
@@ -87,8 +85,12 @@ export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, open, 
             content: <PostMetaForm className="animate-opacity" />,
             rightPanelContent: <PostMetaFormPanel />,
             nextAction: async () => {
-                await createPost({ images, aspectRatio, description })
-                handleClose()
+                try {
+                    await createPost({ images, aspectRatio, description })
+                    handleClose()
+                } catch (e) {
+                    alert("Error ")
+                }
             },
             backAction: () => {
                 clearCroppedImages()

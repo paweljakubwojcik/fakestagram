@@ -7,7 +7,7 @@ export const getPaginatedResults = async <T extends BaseEntity>(
     query: QueryBuilder<T>,
     { limit, order, cursor, sort = "createdAt" }: PaginationArgs
 ): Promise<PaginatedResponse<T>> => {
-    const relation = order === SortDir.ASC ? "$gte" : "$lte"
+    const relation = order === SortDir.ASC ? "$gt" : "$lt"
     const limitWithCursors = limit + 1
 
     if (cursor) {

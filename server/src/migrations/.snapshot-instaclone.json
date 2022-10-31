@@ -52,6 +52,15 @@
           "primary": false,
           "nullable": false,
           "mappedType": "text"
+        },
+        "profile_image": {
+          "name": "profile_image",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "string"
         }
       },
       "name": "user",
@@ -252,6 +261,71 @@
           "primary": false,
           "nullable": false,
           "mappedType": "string"
+        }
+      },
+      "name": "user_saved",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "user_saved_pkey",
+          "columnNames": [
+            "user_id",
+            "post_id"
+          ],
+          "composite": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "user_saved_user_id_foreign": {
+          "constraintName": "user_saved_user_id_foreign",
+          "columnNames": [
+            "user_id"
+          ],
+          "localTableName": "public.user_saved",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.user",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        },
+        "user_saved_post_id_foreign": {
+          "constraintName": "user_saved_post_id_foreign",
+          "columnNames": [
+            "post_id"
+          ],
+          "localTableName": "public.user_saved",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.post",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        }
+      }
+    },
+    {
+      "columns": {
+        "post_id": {
+          "name": "post_id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "string"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "string"
         },
         "created_at": {
           "name": "created_at",
@@ -280,8 +354,8 @@
         {
           "keyName": "like_pkey",
           "columnNames": [
-            "user_id",
-            "post_id"
+            "post_id",
+            "user_id"
           ],
           "composite": true,
           "primary": true,
@@ -290,18 +364,6 @@
       ],
       "checks": [],
       "foreignKeys": {
-        "like_user_id_foreign": {
-          "constraintName": "like_user_id_foreign",
-          "columnNames": [
-            "user_id"
-          ],
-          "localTableName": "public.like",
-          "referencedColumnNames": [
-            "id"
-          ],
-          "referencedTableName": "public.user",
-          "updateRule": "cascade"
-        },
         "like_post_id_foreign": {
           "constraintName": "like_post_id_foreign",
           "columnNames": [
@@ -312,6 +374,18 @@
             "id"
           ],
           "referencedTableName": "public.post",
+          "updateRule": "cascade"
+        },
+        "like_user_id_foreign": {
+          "constraintName": "like_user_id_foreign",
+          "columnNames": [
+            "user_id"
+          ],
+          "localTableName": "public.like",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.user",
           "updateRule": "cascade"
         }
       }
@@ -354,7 +428,6 @@
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "default": "'https://instaclone.imgix.net/instaclone-posts/FSOTUDlaUAAnChz.jpg'",
           "mappedType": "string"
         },
         "post_id": {

@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ["instaclone.imgix.net"],
+    domains: ["instaclone.imgix.net", "robohash.org"],
   },
   webpack(config) {
     config.module.rules.push({

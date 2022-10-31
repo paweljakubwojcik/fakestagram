@@ -26,6 +26,7 @@ export type Image = {
   __typename?: 'Image';
   createdAt: Scalars['DateTime'];
   id: Scalars['String'];
+  originalUrl: Scalars['String'];
   post: Post;
   updatedAt: Scalars['DateTime'];
   url: UrlSet;
@@ -194,6 +195,7 @@ export type User = {
   following: Array<User>;
   id: Scalars['String'];
   posts: PostConnection;
+  profileImage: Scalars['String'];
   updatedAt: Scalars['DateTime'];
   username: Scalars['String'];
 };
@@ -208,9 +210,9 @@ export type UserPostsArgs = {
 
 export type LikesFragment = { __typename?: 'Post', id: string, likedByMe: boolean, likeCount: number };
 
-export type BasicPostFragmentFragment = { __typename?: 'Post', id: string, createdAt: any, updatedAt: any, description: string, aspectRatio: string, likedByMe: boolean, likeCount: number, images: Array<{ __typename?: 'Image', id: string, url: { __typename?: 'UrlSet', original: string, small: string } }>, author: { __typename?: 'User', id: string, username: string } };
+export type BasicPostFragmentFragment = { __typename?: 'Post', id: string, createdAt: any, updatedAt: any, description: string, aspectRatio: string, likedByMe: boolean, likeCount: number, images: Array<{ __typename?: 'Image', id: string, url: { __typename?: 'UrlSet', original: string, small: string } }>, author: { __typename?: 'User', id: string, username: string, profileImage: string } };
 
-export type UserFragmentFragment = { __typename?: 'User', username: string, id: string };
+export type UserFragmentFragment = { __typename?: 'User', username: string, id: string, profileImage: string };
 
 export type CreatePostMutationVariables = Exact<{
   description: Scalars['String'];
@@ -219,7 +221,7 @@ export type CreatePostMutationVariables = Exact<{
 }>;
 
 
-export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'Post', id: string, createdAt: any, updatedAt: any, description: string, aspectRatio: string, likedByMe: boolean, likeCount: number, images: Array<{ __typename?: 'Image', id: string, url: { __typename?: 'UrlSet', original: string, small: string } }>, author: { __typename?: 'User', id: string, username: string } } };
+export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'Post', id: string, createdAt: any, updatedAt: any, description: string, aspectRatio: string, likedByMe: boolean, likeCount: number, images: Array<{ __typename?: 'Image', id: string, url: { __typename?: 'UrlSet', original: string, small: string } }>, author: { __typename?: 'User', id: string, username: string, profileImage: string } } };
 
 export type LikeOrDislikePostMutationVariables = Exact<{
   post: Scalars['String'];
@@ -235,7 +237,7 @@ export type LoginMutationVariables = Exact<{
 }>;
 
 
-export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'User', username: string, id: string } };
+export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'User', username: string, id: string, profileImage: string } };
 
 export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -248,7 +250,7 @@ export type RegisterMutationVariables = Exact<{
 }>;
 
 
-export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'User', username: string, id: string } };
+export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'User', username: string, id: string, profileImage: string } };
 
 export type IsUsernameAvailableQueryVariables = Exact<{
   username: Scalars['String'];
@@ -260,7 +262,7 @@ export type IsUsernameAvailableQuery = { __typename?: 'Query', isUsernameAvailab
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', username: string, id: string } | null };
+export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', username: string, id: string, profileImage: string } | null };
 
 export type PostsQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Int']>;
@@ -270,7 +272,14 @@ export type PostsQueryVariables = Exact<{
 }>;
 
 
-export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PostConnection', list: Array<{ __typename?: 'Post', id: string, createdAt: any, updatedAt: any, description: string, aspectRatio: string, likedByMe: boolean, likeCount: number, images: Array<{ __typename?: 'Image', id: string, url: { __typename?: 'UrlSet', original: string, small: string } }>, author: { __typename?: 'User', id: string, username: string } }>, pageInfo: { __typename?: 'PostPageInfo', cursor?: string | null, hasNextPage: boolean } } };
+export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PostConnection', list: Array<{ __typename?: 'Post', id: string, createdAt: any, updatedAt: any, description: string, aspectRatio: string, likedByMe: boolean, likeCount: number, images: Array<{ __typename?: 'Image', id: string, url: { __typename?: 'UrlSet', original: string, small: string } }>, author: { __typename?: 'User', id: string, username: string, profileImage: string } }>, pageInfo: { __typename?: 'PostPageInfo', cursor?: string | null, hasNextPage: boolean } } };
+
+export type ProfileQueryVariables = Exact<{
+  username: Scalars['String'];
+}>;
+
+
+export type ProfileQuery = { __typename?: 'Query', user: { __typename?: 'User', id: string, username: string, posts: { __typename?: 'PostConnection', list: Array<{ __typename?: 'Post', id: string, images: Array<{ __typename?: 'Image', id: string, url: { __typename?: 'UrlSet', small: string } }> }> } } };
 
 export type SignedUrlQueryVariables = Exact<{
   filename: Scalars['String'];
@@ -312,6 +321,7 @@ export const BasicPostFragmentFragmentDoc = gql`
   author {
     id
     username
+    profileImage
   }
 }
     `;
@@ -319,6 +329,7 @@ export const UserFragmentFragmentDoc = gql`
     fragment UserFragment on User {
   username
   id
+  profileImage
 }
     `;
 export const CreatePostDocument = gql`
@@ -603,6 +614,53 @@ export function usePostsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Post
 export type PostsQueryHookResult = ReturnType<typeof usePostsQuery>;
 export type PostsLazyQueryHookResult = ReturnType<typeof usePostsLazyQuery>;
 export type PostsQueryResult = Apollo.QueryResult<PostsQuery, PostsQueryVariables>;
+export const ProfileDocument = gql`
+    query Profile($username: String!) {
+  user(username: $username) {
+    id
+    username
+    posts {
+      list {
+        id
+        images {
+          id
+          url {
+            small
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useProfileQuery__
+ *
+ * To run a query within a React component, call `useProfileQuery` and pass it any options that fit your needs.
+ * When your component renders, `useProfileQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useProfileQuery({
+ *   variables: {
+ *      username: // value for 'username'
+ *   },
+ * });
+ */
+export function useProfileQuery(baseOptions: Apollo.QueryHookOptions<ProfileQuery, ProfileQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ProfileQuery, ProfileQueryVariables>(ProfileDocument, options);
+      }
+export function useProfileLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ProfileQuery, ProfileQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ProfileQuery, ProfileQueryVariables>(ProfileDocument, options);
+        }
+export type ProfileQueryHookResult = ReturnType<typeof useProfileQuery>;
+export type ProfileLazyQueryHookResult = ReturnType<typeof useProfileLazyQuery>;
+export type ProfileQueryResult = Apollo.QueryResult<ProfileQuery, ProfileQueryVariables>;
 export const SignedUrlDocument = gql`
     query SignedUrl($filename: String!) {
   signedUrl(filename: $filename)
