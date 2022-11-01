@@ -26,6 +26,7 @@ export type PostFormSlice = {
     description: string
     aspectRatio: AspectRatio
     add: (files: File[]) => Promise<void>
+    append: (files: File[]) => Promise<void>
     remove: (id: string) => void
     clear: () => void
     setCurrentImage: (currentImage: string) => void
@@ -59,6 +60,15 @@ export const usePostState = create<PostFormSlice>()(
                 const newImages = Object.fromEntries(images.map((image) => [uuid(), image]))
                 set({
                     images: newImages,
+                    currentImage: Object.keys(newImages)[0],
+                })
+            },
+            append: async (files) => {
+                const images = await Promise.all(files.map((file) => createImageConfig(file)))
+                const newImages = Object.fromEntries(images.map((image) => [uuid(), image]))
+                const prevImages = get().images
+                set({
+                    images: { ...prevImages, ...newImages },
                     currentImage: Object.keys(newImages)[0],
                 })
             },

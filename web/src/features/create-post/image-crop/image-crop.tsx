@@ -15,6 +15,7 @@ type ImageCropProps = ComponentPropsWithoutRef<"div"> & {
 
 export const ImageCrop: FC<ImageCropProps> = ({ className, innerRef }) => {
     const currentImage = usePostState(getCurrentImage)
+    const currentImageId = usePostState(state => state.currentImage)
     const { aspectRatio, currentImage: imageKey } = usePostState(pick(["currentImage", "aspectRatio"]))
     const setCrop = usePostState((state) => state.setCrop)
 
@@ -133,6 +134,7 @@ export const ImageCrop: FC<ImageCropProps> = ({ className, innerRef }) => {
             >
                 <div
                     id="image"
+                    key={currentImageId}
                     ref={picRef}
                     style={{
                         backgroundImage: `url(${currentImage.originalUrl})`,
