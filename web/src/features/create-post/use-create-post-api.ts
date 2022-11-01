@@ -2,7 +2,7 @@ import { useCreatePostMutation, useSignedUrlsLazyQuery } from "@graphql"
 import { useState } from "react"
 import axios from "axios"
 import { asyncForEach } from "utils/async-for-each"
-import { AspectRatio, EditableImage } from "components/post-form/post-state"
+import { AspectRatio, EditableImage } from "features/create-post/post-state"
 import { url } from "inspector"
 
 type CreatePostArguments = {

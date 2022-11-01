@@ -3,7 +3,7 @@ import Head from "next/head"
 
 import { Modal } from "components/modal"
 import { MultiStepForm, MultiStepFormProps } from "components/multistep-form"
-import { useCreatePostApi } from "hooks/use-create-post-api"
+import { useCreatePostApi } from "features/create-post/use-create-post-api"
 import { equals, isEmpty, pick } from "ramda"
 import { ComponentProps, ComponentPropsWithoutRef, FC, useEffect, useReducer } from "react"
 import { ImageCrop } from "./image-crop/image-crop"
