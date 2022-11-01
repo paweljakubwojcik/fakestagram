@@ -36,6 +36,7 @@ type Mutation {
   login(credentials: Credentials!): User!
   logout: Boolean!
   register(credentials: Credentials!): User!
+  removeImage(filename: String!): String!
   unFollow(userId: String!): User!
   updatePost(description: String, id: String!): Post
 }

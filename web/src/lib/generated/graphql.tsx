@@ -48,6 +48,7 @@ export type Mutation = {
   login: User;
   logout: Scalars['Boolean'];
   register: User;
+  removeImage: Scalars['String'];
   unFollow: User;
   updatePost?: Maybe<Post>;
 };
@@ -83,6 +84,11 @@ export type MutationLoginArgs = {
 
 export type MutationRegisterArgs = {
   credentials: Credentials;
+};
+
+
+export type MutationRemoveImageArgs = {
+  filename: Scalars['String'];
 };
 
 
@@ -251,6 +257,13 @@ export type RegisterMutationVariables = Exact<{
 
 
 export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'User', username: string, id: string, profileImage: string } };
+
+export type RemoveImageMutationVariables = Exact<{
+  filename: Scalars['String'];
+}>;
+
+
+export type RemoveImageMutation = { __typename?: 'Mutation', removeImage: string };
 
 export type IsUsernameAvailableQueryVariables = Exact<{
   username: Scalars['String'];
@@ -503,6 +516,37 @@ export function useRegisterMutation(baseOptions?: Apollo.MutationHookOptions<Reg
 export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
 export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
 export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
+export const RemoveImageDocument = gql`
+    mutation RemoveImage($filename: String!) {
+  removeImage(filename: $filename)
+}
+    `;
+export type RemoveImageMutationFn = Apollo.MutationFunction<RemoveImageMutation, RemoveImageMutationVariables>;
+
+/**
+ * __useRemoveImageMutation__
+ *
+ * To run a mutation, you first call `useRemoveImageMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRemoveImageMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [removeImageMutation, { data, loading, error }] = useRemoveImageMutation({
+ *   variables: {
+ *      filename: // value for 'filename'
+ *   },
+ * });
+ */
+export function useRemoveImageMutation(baseOptions?: Apollo.MutationHookOptions<RemoveImageMutation, RemoveImageMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RemoveImageMutation, RemoveImageMutationVariables>(RemoveImageDocument, options);
+      }
+export type RemoveImageMutationHookResult = ReturnType<typeof useRemoveImageMutation>;
+export type RemoveImageMutationResult = Apollo.MutationResult<RemoveImageMutation>;
+export type RemoveImageMutationOptions = Apollo.BaseMutationOptions<RemoveImageMutation, RemoveImageMutationVariables>;
 export const IsUsernameAvailableDocument = gql`
     query IsUsernameAvailable($username: String!) {
   isUsernameAvailable(username: $username)

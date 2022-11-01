@@ -61,10 +61,7 @@ const PostsResponse = createPaginatedResult(Post)
 @Resolver(() => Post)
 export class PostResolver {
     @Query(() => Post, { nullable: true })
-    post(
-        @Arg("id", () => ID) id: string,
-        @Ctx() { em }: MyContext
-    ): Promise<Post | null> {
+    post(@Arg("id", () => ID) id: string, @Ctx() { em }: MyContext): Promise<Post | null> {
         return em.findOne(Post, { id })
     }
 
@@ -83,10 +80,7 @@ export class PostResolver {
 
     @Mutation(() => Post)
     @UseMiddleware(isAuth)
-    async createPost(
-        @Args() postData: AddPostInput,
-        @Ctx() { em, req }: MyContext
-    ): Promise<Post> {
+    async createPost(@Args() postData: AddPostInput, @Ctx() { em, req }: MyContext): Promise<Post> {
         const post = em.create(Post, {
             ...postData,
             author: em.getReference(User, req.session.userId!),
@@ -113,21 +107,14 @@ export class PostResolver {
 
     @Mutation(() => Boolean)
     @UseMiddleware(isAuth)
-    async deletePost(
-        @Arg("id") id: string,
-        @Ctx() { em }: MyContext
-    ): Promise<boolean> {
+    async deletePost(@Arg("id") id: string, @Ctx() { em }: MyContext): Promise<boolean> {
         await em.nativeDelete(Post, { id })
         return true
     }
 
     @Mutation(() => Post)
     @UseMiddleware(isAuth)
-    async likeOrDislikePost(
-        @Arg("post") id: string,
-        @Arg("like") like: boolean,
-        @Ctx() { em, req }: MyContext
-    ) {
+    async likeOrDislikePost(@Arg("post") id: string, @Arg("like") like: boolean, @Ctx() { em, req }: MyContext) {
         try {
             if (like) {
                 await em.persistAndFlush(
@@ -148,14 +135,10 @@ export class PostResolver {
                 throw new ApolloError("Post is already liked")
             }
             if (e.name === "ForeignKeyConstraintViolationException") {
-                throw new UserInputError(
-                    "Post does not exist or have been deleted"
-                )
+                throw new UserInputError("Post does not exist or have been deleted")
             }
             if (e.name === "NotFoundError") {
-                throw new ApolloError(
-                    "Post doesn't exist or is not liked by you"
-                )
+                throw new ApolloError("Post doesn't exist or is not liked by you")
             }
             throw e
         } finally {

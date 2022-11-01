@@ -1,0 +1,3 @@
+mutation RemoveImage($filename: String!) {
+    removeImage(filename: $filename)
+}

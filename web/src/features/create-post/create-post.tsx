@@ -5,10 +5,11 @@ import { Modal } from "components/modal"
 import { MultiStepForm, MultiStepFormProps } from "components/multistep-form"
 import { useCreatePostApi } from "features/create-post/use-create-post-api"
 import { equals, isEmpty, pick } from "ramda"
-import { ComponentProps, ComponentPropsWithoutRef, FC, useEffect, useReducer } from "react"
+import { ComponentProps, ComponentPropsWithoutRef, FC, useEffect, useReducer, useRef } from "react"
 import { ImageCrop } from "./image-crop/image-crop"
 import { PostMetaForm, PostMetaFormPanel } from "./post-meta-form"
 import { usePostState } from "./post-state"
+import { UseBoundStore } from "zustand"
 
 type CreatePostProps = ComponentPropsWithoutRef<"div"> & ComponentProps<typeof Modal>
 
@@ -30,12 +31,15 @@ const stepsReducer = (state: STEP, action: StepAction) => {
     }
 }
 
+const getPostState = pick(["images", "description", "aspectRatio"])
+
 export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, open, ...props }) => {
-    const { images, aspectRatio } = usePostState(pick(["images", "aspectRatio"]), equals)
-    const description = usePostState(
-        (state) => state.description,
-        () => true
-    )
+    const images = usePostState((state) => state.images)
+
+    // use transient update - not rendering the component
+    const imageFormState = useRef(getPostState(usePostState.getState()))
+    useEffect(() => usePostState.subscribe((state) => (imageFormState.current = getPostState(state))), [])
+
     const clear = usePostState((state) => state.clear)
     const addImages = usePostState((state) => state.add)
     const cropImages = usePostState((state) => state.cropImages)
@@ -58,7 +62,7 @@ export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, open, 
         }
     }, [images])
 
-    const [createPost, { loading, error }] = useCreatePostApi()
+    const [createPost, { loading }] = useCreatePostApi()
 
     const steps: MultiStepFormProps["steps"] = {
         UPLOADING: {
@@ -86,7 +90,18 @@ export const CreatePostView: FC<CreatePostProps> = ({ className, onClose, open, 
             rightPanelContent: <PostMetaFormPanel />,
             nextAction: async () => {
                 try {
-                    await createPost({ images, aspectRatio, description })
+                    await createPost(imageFormState.current, {
+                        onError: (e) => {
+                            Modal.open({
+                                onAccept: handleClose,
+                                title: "Ups something went wrong ",
+                                info: "Something went wrong, your post hasn't been created, please try again later.",
+                            })
+                        },
+                        onUploadProgress: (progress) => {
+                            console.log(progress)
+                        },
+                    })
                     handleClose()
                 } catch (e) {
                     alert("Error ")
