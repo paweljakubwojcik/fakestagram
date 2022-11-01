@@ -1,8 +1,8 @@
-import { Entity, OneToMany, Property, Collection, ManyToMany, Cascade, OneToOne } from "@mikro-orm/core"
+import { Cascade, Collection, Entity, ManyToMany, OneToMany, Property } from "@mikro-orm/core"
 import { Field, ObjectType } from "type-graphql"
 import { BaseEntity } from "./base-entity"
+import { Comment } from "./comment"
 import { Post } from "./post"
-import { Image } from "./image"
 
 @ObjectType()
 @Entity()
@@ -23,6 +23,9 @@ export class User extends BaseEntity {
 
     @ManyToMany(() => Post, "likes")
     liked = new Collection<Post>(this)
+
+    @ManyToMany(() => Comment, "likes")
+    likedComments = new Collection<Comment>(this)
 
     /**
      * saved posts

@@ -24,6 +24,8 @@ import {
     Root,
     UseMiddleware,
 } from "type-graphql"
+import { Comment } from "src/entities/comment"
+import { CommentArgsInput, CommentConnection } from "./comment"
 
 @ArgsType()
 class AddPostInput {
@@ -154,6 +156,20 @@ export class PostResolver {
     @FieldResolver()
     async images(@Root() post: Post, @Ctx() { em }: MyContext) {
         return await em.find(Image, { post: post.id })
+    }
+
+    @FieldResolver(() => CommentConnection)
+    async comments(
+        @Root() post: Post,
+        @Ctx() { em }: MyContext,
+        @Args(() => CommentArgsInput) { limit, order, sort, cursor }: CommentArgsInput
+    ) {
+        return await getPaginatedResults(em.qb(Comment).select(["*"]).where({ post }), {
+            order,
+            cursor,
+            limit,
+            sort,
+        })
     }
 
     @FieldResolver(() => [Like])

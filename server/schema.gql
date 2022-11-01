@@ -3,6 +3,36 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
+type Comment {
+  author: User!
+  content: String!
+  createdAt: DateTime!
+  id: String!
+  likeCount: Float!
+  likedByMe: Boolean!
+  likes: [LikeOnComment!]!
+  post: Post
+  replies(cursor: ID, limit: Int, order: SortDir = ASC, sort: CommentSort = createdAt): CommentConnection!
+  updatedAt: DateTime!
+}
+
+type CommentConnection {
+  list: [Comment!]!
+  pageInfo: CommentPageInfo!
+}
+
+type CommentPageInfo {
+  cursor: ID
+  hasNextPage: Boolean!
+}
+
+enum CommentSort {
+  createdAt
+  id
+  likeCount
+  updatedAt
+}
+
 input Credentials {
   password: String!
   username: String!
@@ -28,22 +58,32 @@ type Like {
   user: User!
 }
 
+type LikeOnComment {
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  user: User!
+}
+
 type Mutation {
+  createComment(comment: ID, content: String!, post: ID): Comment!
   createPost(aspectRatio: String!, description: String!, images: [String!]!): Post!
   deletePost(id: String!): Boolean!
   follow(userId: String!): User!
+  likeOrDislikeComment(comment: String!, like: Boolean!): Post!
   likeOrDislikePost(like: Boolean!, post: String!): Post!
   login(credentials: Credentials!): User!
   logout: Boolean!
   register(credentials: Credentials!): User!
   removeImage(filename: String!): String!
   unFollow(userId: String!): User!
+  updateComment(content: String, id: String!): Post
   updatePost(description: String, id: String!): Post
 }
 
 type Post {
   aspectRatio: String!
   author: User!
+  comments(cursor: ID, limit: Int, order: SortDir = ASC, sort: CommentSort = createdAt): CommentConnection!
   createdAt: DateTime!
   description: String!
   id: String!
@@ -72,6 +112,7 @@ enum PostSort {
 }
 
 type Query {
+  comments(cursor: ID, limit: Int, order: SortDir = ASC, post: String!, sort: String = "createdAt"): CommentConnection!
   isUsernameAvailable(username: String!): Boolean!
   me: User
   post(id: ID!): Post

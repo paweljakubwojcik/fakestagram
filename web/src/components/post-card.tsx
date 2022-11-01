@@ -6,8 +6,9 @@ import Link from "next/link"
 import { ComponentPropsWithoutRef, FC, useState } from "react"
 import { ArrowLeftCircle, ArrowRightCircle, Heart, MessageCircle, MoreHorizontal, Pocket, Send } from "react-feather"
 import { Avatar } from "./avatar"
-import { IconButton } from "./buttons"
+import { Button, IconButton } from "./buttons"
 import { Card } from "./card"
+import { CommentForm } from "./comment-form"
 
 type PostCardProps = ComponentPropsWithoutRef<"div"> & {
     post: BasicPostFragmentFragment
@@ -137,9 +138,7 @@ export const PostCard: FC<PostCardProps> = ({ className, post }) => {
                 </div>
                 <div className="text-sm font-light">{formatDistanceToNow(new Date(createdAt))} ago</div>
             </div>
-            <div>
-                <textarea />
-            </div>
+            <CommentForm className="border-t border-t-gray-700 px-4 py-2" />
         </Card>
     )
 }

@@ -25,7 +25,7 @@ const Home: NextPage = () => {
                 <title>Home | Fakestagram</title>
             </Head>
             <Navbar />
-            <main className="max-w-main-content mx-auto flex items-start">
+            <main className="max-w-main-content mx-auto flex items-start justify-center">
                 <div className="max-w-2xl flex-grow-[3]">
                     <List
                         onScrollToEnd={() => {
@@ -44,7 +44,7 @@ const Home: NextPage = () => {
                         ))}
                     </List>
                 </div>
-                <Card className="flex-grow-[1] hidden sm:flex h-40 !mr-0 sticky top-[60px]">idk</Card>
+                <Card className="flex-grow-[1] hidden md:flex h-40 !mr-0 sticky top-[60px]">idk</Card>
             </main>
         </>
     )
